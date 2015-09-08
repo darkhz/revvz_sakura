@@ -169,12 +169,6 @@ enum zs_stat_type {
 	CLASS_ALMOST_EMPTY,
 };
 
-#ifdef CONFIG_ZSMALLOC_STAT
-#define NR_ZS_STAT_TYPE	(CLASS_ALMOST_EMPTY + 1)
-#else
-#define NR_ZS_STAT_TYPE	(OBJ_USED + 1)
-#endif
-
 struct zs_size_stat {
 	unsigned long objs[NR_ZS_STAT_TYPE];
 };
@@ -218,6 +212,8 @@ struct size_class {
 
 	/* Number of PAGE_SIZE sized pages to combine to form a 'zspage' */
 	int pages_per_zspage;
+	struct zs_size_stat stats;
+
 	/* huge object: pages_per_zspage == 1 && maxobj_per_zspage == 1 */
 	bool huge;
 };
@@ -483,7 +479,7 @@ static inline unsigned long zs_stat_get(struct size_class *class,
 
 #ifdef CONFIG_ZSMALLOC_STAT
 
-static void __init zs_stat_init(void)
+static int __init zs_stat_init(void)
 {
 	if (!debugfs_initialized()) {
 		pr_warn("debugfs not available, stat dir not created\n");
@@ -605,8 +601,6 @@ static void zs_pool_stat_destroy(struct zs_pool *pool)
 }
 
 #else /* CONFIG_ZSMALLOC_STAT */
-static void __init zs_stat_init(void)
-{
 }
 
 static void __exit zs_stat_exit(void)
