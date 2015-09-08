@@ -1496,8 +1496,9 @@ void zs_free(struct zs_pool *pool, unsigned long handle)
 }
 EXPORT_SYMBOL_GPL(zs_free);
 
-static void zs_object_copy(struct size_class *class, unsigned long dst,
-				unsigned long src)
+static void zs_object_copy(unsigned long dst, unsigned long src,
+				struct size_class *class)
+
 {
 	struct page *s_page, *d_page;
 	unsigned long s_objidx, d_objidx;
@@ -1631,8 +1632,8 @@ static int migrate_zspage(struct zs_pool *pool, struct size_class *class,
 		}
 
 		used_obj = handle_to_obj(handle);
-		free_obj = obj_malloc(class, d_page, handle);
-		zs_object_copy(class, free_obj, used_obj);
+		free_obj = obj_malloc(d_page, class, handle);
+		zs_object_copy(free_obj, used_obj, class);
 		index++;
 		free_obj |= BIT(HANDLE_PIN_BIT);
 		record_obj(handle, free_obj);
