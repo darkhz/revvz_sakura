@@ -49,6 +49,8 @@
 #include <asm/uaccess.h>
 #include <asm/sections.h>
 
+#include "../printk_interface.h"
+
 #define CREATE_TRACE_POINTS
 #include <trace/events/printk.h>
 
@@ -1873,6 +1875,10 @@ EXPORT_SYMBOL(vprintk_emit);
 
 asmlinkage int vprintk(const char *fmt, va_list args)
 {
+	// if printk mode is disabled, terminate instantly
+	if (printk_mode == 0)
+			return 0;
+
 	return vprintk_emit(0, LOGLEVEL_DEFAULT, NULL, 0, fmt, args);
 }
 EXPORT_SYMBOL(vprintk);
@@ -1933,6 +1939,10 @@ asmlinkage __visible int printk(const char *fmt, ...)
 {
 	va_list args;
 	int r;
+
+	// if printk mode is disabled, terminate instantly
+	if (printk_mode == 0)
+		return 0;
 
 	va_start(args, fmt);
 	r = vprintk_func(fmt, args);
