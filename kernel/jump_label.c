@@ -15,6 +15,7 @@
 #include <linux/static_key.h>
 #include <linux/jump_label_ratelimit.h>
 #include <linux/bug.h>
+#include <linux/bug.h>
 
 #ifdef HAVE_JUMP_LABEL
 
