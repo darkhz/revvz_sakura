@@ -1158,8 +1158,9 @@ static void change_pageblock_range(struct page *pageblock_page,
  * If we claim more than half of the pageblock, change pageblock's migratetype
  * as well.
  */
-static bool can_steal_fallback(unsigned int order, int start_mt,
-			int fallback_type, unsigned int start_order)
+
+static bool can_steal_fallback(unsigned int current_order, unsigned int start_order,
+			       int start_mt, int fallback_mt)
 {
 	/*
 	 * Leaving this order check is intended, although there is
@@ -1168,14 +1169,18 @@ static bool can_steal_fallback(unsigned int order, int start_mt,
 	 * but, below check doesn't guarantee it and that is just heuristic
 	 * so could be changed anytime.
 	 */
-	if (order >= pageblock_order)
+	if (current_order >= pageblock_order)
 		return true;
 
-	if ((start_mt != MIGRATE_UNMOVABLE && order >= pageblock_order / 2) ||
-	(start_mt == MIGRATE_UNMOVABLE && fallback_type != MIGRATE_MOVABLE && order >= pageblock_order / 2) ||
-	start_mt == MIGRATE_RECLAIMABLE ||
-	(start_mt == MIGRATE_UNMOVABLE && start_order >= 5) ||
-	page_group_by_mobility_disabled)
+	/* don't let unmovable allocations cause migrations simply because of free pages */
+	if ((start_mt != MIGRATE_UNMOVABLE && current_order >= pageblock_order / 2) ||
+	        /* only steal reclaimable page blocks for unmovable allocations */
+	        (start_mt == MIGRATE_UNMOVABLE && fallback_mt != MIGRATE_MOVABLE && current_order >= pageblock_order / 2) ||
+	        /* reclaimable can steal aggressively */
+		start_mt == MIGRATE_RECLAIMABLE ||
+		/* allow unmovable allocs up to 64K without migrating blocks */
+		(start_mt == MIGRATE_UNMOVABLE && start_order >= 5) ||
+		page_group_by_mobility_disabled)
 		return true;
 
 	return false;
@@ -1209,8 +1214,13 @@ static void steal_suitable_fallback(struct zone *zone, struct page *page,
 }
 
 /* Check whether there is a suitable fallback freepage with requested order. */
+<<<<<<< HEAD
 static int find_suitable_fallback(struct free_area *area, unsigned int order,
 					int migratetype, bool *can_steal, unsigned int start_order)
+=======
+static int find_suitable_fallback(struct free_area *area, unsigned int current_order,
+				  int migratetype, int start_order, bool *can_steal)
+>>>>>>> b1b13df... mm: fix pageblock heuristic
 {
 	int i;
 	int fallback_mt;
@@ -1227,7 +1237,11 @@ static int find_suitable_fallback(struct free_area *area, unsigned int order,
 		if (list_empty(&area->free_list[fallback_mt]))
 			continue;
 
+<<<<<<< HEAD
 		if (can_steal_fallback(order, migratetype, fallback_mt, start_order))
+=======
+		if (can_steal_fallback(current_order, start_order, migratetype, fallback_mt))
+>>>>>>> b1b13df... mm: fix pageblock heuristic
 			*can_steal = true;
 
 		return fallback_mt;
@@ -1252,7 +1266,11 @@ __rmqueue_fallback(struct zone *zone, unsigned int order, int start_migratetype)
 				--current_order) {
 		area = &(zone->free_area[current_order]);
 		fallback_mt = find_suitable_fallback(area, current_order,
+<<<<<<< HEAD
 				start_migratetype, &can_steal, order);
+=======
+			start_migratetype, order, &can_steal);
+>>>>>>> b1b13df... mm: fix pageblock heuristic
 		if (fallback_mt == -1)
 			continue;
 
