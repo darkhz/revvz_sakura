@@ -1108,7 +1108,92 @@ static int demote_cblock(struct smq_policy *mq,
 		 * time and hope there's a clean block next time this block
 		 * is hit.
 		 */
-		return -ENOSPC;
+		return q_size(&mq->dirty) == 0u;
+	else
+		return (nr_clean + btracker_nr_writebacks_queued(mq->bg_work)) >=
+		       percent_to_target(mq, CLEAN_TARGET);
+}
+
+static bool free_target_met(struct smq_policy *mq, bool idle)
+{
+	unsigned nr_free = from_cblock(mq->cache_size) -
+			   mq->cache_alloc.nr_allocated;
+
+	if (idle)
+		return (nr_free + btracker_nr_demotions_queued(mq->bg_work)) >=
+		       percent_to_target(mq, FREE_TARGET);
+	else
+		return true;
+}
+
+/*----------------------------------------------------------------*/
+
+static void mark_pending(struct smq_policy *mq, struct entry *e)
+{
+	BUG_ON(e->sentinel);
+	BUG_ON(!e->allocated);
+	BUG_ON(e->pending_work);
+	e->pending_work = true;
+}
+
+static void clear_pending(struct smq_policy *mq, struct entry *e)
+{
+	BUG_ON(!e->pending_work);
+	e->pending_work = false;
+}
+
+static void queue_writeback(struct smq_policy *mq)
+{
+	int r;
+	struct policy_work work;
+	struct entry *e;
+
+	e = q_peek(&mq->dirty, mq->dirty.nr_levels, !mq->migrations_allowed);
+	if (e) {
+		mark_pending(mq, e);
+		q_del(&mq->dirty, e);
+
+		work.op = POLICY_WRITEBACK;
+		work.oblock = e->oblock;
+		work.cblock = infer_cblock(mq, e);
+
+		r = btracker_queue(mq->bg_work, &work, NULL);
+		WARN_ON_ONCE(r); // FIXME: finish, I think we have to get rid of this race.
+	}
+}
+
+static void queue_demotion(struct smq_policy *mq)
+{
+	struct policy_work work;
+	struct entry *e;
+
+	if (unlikely(WARN_ON_ONCE(!mq->migrations_allowed)))
+		return;
+
+	e = q_peek(&mq->clean, mq->clean.nr_levels, true);
+	if (!e) {
+		if (!clean_target_met(mq, false))
+			queue_writeback(mq);
+		return;
+	}
+
+	mark_pending(mq, e);
+	q_del(&mq->clean, e);
+
+	work.op = POLICY_DEMOTE;
+	work.oblock = e->oblock;
+	work.cblock = infer_cblock(mq, e);
+	btracker_queue(mq->bg_work, &work, NULL);
+}
+
+static void queue_promotion(struct smq_policy *mq, dm_oblock_t oblock,
+			    struct policy_work **workp)
+{
+	struct entry *e;
+	struct policy_work work;
+
+	if (!mq->migrations_allowed)
+		return;
 
 	if (locker->fn(locker, demoted->oblock))
 		/*
