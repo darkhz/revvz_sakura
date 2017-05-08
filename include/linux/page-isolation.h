@@ -65,4 +65,13 @@ int test_pages_isolated(unsigned long start_pfn, unsigned long end_pfn,
 struct page *alloc_migrate_target(struct page *page, unsigned long private,
 				int **resultp);
 
+static inline bool is_migrate_highatomic(int migratetype)
+{
+	return migratetype == MIGRATE_HIGHATOMIC;
+}
+static inline bool is_migrate_highatomic_page(struct page *page)
+{
+	return get_pageblock_migratetype(page) == MIGRATE_HIGHATOMIC;
+}
+
 #endif
