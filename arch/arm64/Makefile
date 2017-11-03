@@ -57,11 +57,12 @@ KBUILD_CFLAGS	+= -mno-implicit-float
 else
 KBUILD_CFLAGS	+= -mgeneral-regs-only
 endif
-KBUILD_CFLAGS	+= $(lseinstr)
-KBUILD_CFLAGS	+= -fno-asynchronous-unwind-tables
-KBUILD_CFLAGS	+= $(call cc-option, -mpc-relative-literal-loads)
+KBUILD_CFLAGS	+= $(lseinstr) $(vdso32)
 KBUILD_CFLAGS	+= -fno-pic
-KBUILD_AFLAGS	+= $(lseinstr)
+KBUILD_CFLAGS	+= $(call cc-option, -mpc-relative-literal-loads)
+KBUILD_CFLAGS	+= -fno-asynchronous-unwind-tables
+KBUILD_CFLAGS	+= $(call cc-ifversion, -ge, 0500, -DCONFIG_ARCH_SUPPORTS_INT128)
+KBUILD_AFLAGS   += $(lseinstr) $(vdso32)
 
 ifeq ($(CONFIG_CPU_BIG_ENDIAN), y)
 KBUILD_CPPFLAGS	+= -mbig-endian
