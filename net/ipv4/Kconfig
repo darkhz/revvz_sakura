@@ -656,6 +656,34 @@ config TCP_CONG_BBR
 	bufferbloat, policers, or AQM schemes that do not provide a delay
 	signal. It requires the fq ("Fair Queue") pacing packet scheduler.
 
+config TCP_CONG_TSUNAMI
+        tristate "Tsunami - BBR Based TCP Congestion with magic optimiztion"
+        default n
+        ---help---
+
+	Tsunami TCP Congestion Control - BBR Based TCP Congedtion with magic optimiztion
+	Modified by Yankee.
+
+config TCP_CONG_SCALABLE_RE
+	tristate "Scalable RE TCP"
+	default n
+	---help---
+	Scalable RE TCP is a sender-side only change to TCP which uses a
+	MIMD congestion control algorithm which has some nice scaling
+	properties, though is known to have fairness issues.
+	See http://www.deneholme.net/tom/scalable/
+
+config TCP_CONG_AGILESD
+        tristate "Agile-SD Congestion control"
+        default n
+        ---help---
+        
+        This is version 1.0 of Agile-SD TCP. It is a sender-side only. 
+        It contributes the Agility Factor (AF) to shorten the epoch time 
+        and to make TCP independent from RTT. AF reduces the sensitivity 
+        to packet losses, which in turn Agile-SD to achieve better throughput 
+        over high-speed networks.
+
 choice
 	prompt "Default TCP congestion control"
 	default DEFAULT_CUBIC
@@ -687,11 +715,17 @@ choice
 	config DEFAULT_DCTCP
 		bool "DCTCP" if TCP_CONG_DCTCP=y
 
+	config DEFAULT_AGILESD
+		bool "AGILESD" if TCP_CONG_AGILESD=y
+
 	config DEFAULT_CDG
 		bool "CDG" if TCP_CONG_CDG=y
 
 	config DEFAULT_BBR
 		bool "BBR" if TCP_CONG_BBR=y
+
+        config DEFAULT_TSUNAMI
+                bool "Tsunami" if TCP_CONG_TSUNAMI=y
 
 	config DEFAULT_RENO
 		bool "Reno"
@@ -717,6 +751,7 @@ config DEFAULT_TCP_CONG
 	default "dctcp" if DEFAULT_DCTCP
 	default "cdg" if DEFAULT_CDG
 	default "bbr" if DEFAULT_BBR
+        default "tsunami" if DEFAULT_TSUNAMI
 	default "cubic"
 
 config TCP_MD5SIG
