@@ -3,7 +3,7 @@
  * them to run sooner, but does not allow tons of sleepers to
  * rip the spread apart.
  */
-SCHED_FEAT(GENTLE_FAIR_SLEEPERS, false)
+SCHED_FEAT(GENTLE_FAIR_SLEEPERS, true)
 
 /*
  * Place new tasks ahead so that they do not starve already running
@@ -16,7 +16,7 @@ SCHED_FEAT(START_DEBIT, true)
  * wakeup-preemption), since its likely going to consume data we
  * touched, increases cache locality.
  */
-SCHED_FEAT(NEXT_BUDDY, true)
+SCHED_FEAT(NEXT_BUDDY, false)
 
 /*
  * Prefer to schedule the task that ran last (when we did
@@ -24,6 +24,12 @@ SCHED_FEAT(NEXT_BUDDY, true)
  * cache locality.
  */
 SCHED_FEAT(LAST_BUDDY, true)
+
+/*
+ * skip buddy i.e task called yield() is always skipped and the
+ * next entity is selected to run irrespective of the vruntime
+ */
+SCHED_FEAT(STRICT_SKIP_BUDDY, true)
 
 /*
  * Consider buddies to be cache hot, decreases the likelyness of a
@@ -36,15 +42,9 @@ SCHED_FEAT(CACHE_HOT_BUDDY, true)
  */
 SCHED_FEAT(WAKEUP_PREEMPTION, true)
 
-/*
- * Use arch dependent cpu capacity functions
- */
-SCHED_FEAT(ARCH_CAPACITY, false)
-SCHED_FEAT(ARCH_POWER, false)
-
 SCHED_FEAT(HRTICK, false)
 SCHED_FEAT(DOUBLE_TICK, false)
-SCHED_FEAT(LB_BIAS, false)
+SCHED_FEAT(LB_BIAS, true)
 
 /*
  * Decrement CPU capacity based on time not spent running tasks
@@ -96,7 +96,7 @@ SCHED_FEAT(ENERGY_AWARE, false)
  * If enabled, this can be used to inform the scheduler about capacity
  * restrictions.
  */
-SCHED_FEAT(MIN_CAPACITY_CAPPING, true)
+SCHED_FEAT(MIN_CAPACITY_CAPPING, false)
 
 /*
  * Enforce the priority of candidates selected by find_best_target()
@@ -110,3 +110,16 @@ SCHED_FEAT(FBT_STRICT_ORDER, false)
  * OFF: schedtune.prefer_idle is honored as is.
  */
 SCHED_FEAT(EAS_USE_NEED_IDLE, true)
+
+
+/*
+ * Apply schedtune boost hold to tasks of all sched classes.
+ * If enabled, schedtune will hold the boost applied to a CPU
+ * for 50ms regardless of task activation - if the task is
+ * still running 50ms later, the boost hold expires and schedtune
+ * boost will expire immediately the task stops.
+ * If disabled, this behaviour will only apply to tasks of the
+ * RT class.
+ */
+SCHED_FEAT(SCHEDTUNE_BOOST_HOLD_ALL, false)
+SCHED_FEAT(HISI_FILTER, true)
