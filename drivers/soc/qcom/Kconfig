@@ -893,6 +893,14 @@ config MSM_BAM_DMUX
 		allows for G-Link communication with remote subsystems that are
 		external to the System-on-Chip.
 
+config MSM_HOTPLUG
+	bool "MSM hotplug driver"
+	depends on HOTPLUG_CPU
+	default y
+	help
+	  The MSM hotplug driver controls on-/offlining of additional cores based
+	  on current cpu load.
+
 config STATE_NOTIFIER
         bool "State Notifier"
 	default y
