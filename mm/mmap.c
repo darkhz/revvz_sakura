@@ -2725,6 +2725,7 @@ int do_munmap(struct mm_struct *mm, unsigned long start, size_t len)
 				mm->locked_vm -= vma_pages(tmp);
 				munlock_vma_pages_all(tmp);
 			}
+
 			tmp = tmp->vm_next;
 		}
 	}
