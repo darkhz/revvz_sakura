@@ -1225,9 +1225,8 @@ int do_huge_pmd_numa_page(struct fault_env *fe, pmd_t pmd)
 		page = pmd_page(*fe->pmd);
 		if (!get_page_unless_zero(page))
 			goto out_unlock;
-		spin_unlock(fe->ptl);
-		wait_on_page_locked(page);
-		put_page(page);
+		spin_unlock(vmf->ptl);
+		put_and_wait_on_page_locked(page);
 		goto out;
 	}
 
