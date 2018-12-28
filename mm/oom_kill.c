@@ -216,11 +216,11 @@ unsigned long oom_badness(struct task_struct *p, struct mem_cgroup *memcg,
 	return points > 0 ? points : 1;
 }
 
-enum oom_constraint {
-	CONSTRAINT_NONE,
-	CONSTRAINT_CPUSET,
-	CONSTRAINT_MEMORY_POLICY,
-	CONSTRAINT_MEMCG,
+static const char * const oom_constraint_text[] = {
+	[CONSTRAINT_NONE] = "CONSTRAINT_NONE",
+	[CONSTRAINT_CPUSET] = "CONSTRAINT_CPUSET",
+	[CONSTRAINT_MEMORY_POLICY] = "CONSTRAINT_MEMORY_POLICY",
+	[CONSTRAINT_MEMCG] = "CONSTRAINT_MEMCG",
 };
 
 /*
@@ -399,6 +399,17 @@ void dump_tasks(struct mem_cgroup *memcg, const nodemask_t *nodemask)
 	rcu_read_unlock();
 }
 
+static void dump_oom_summary(struct oom_control *oc, struct task_struct *victim)
+{
+	/* one line summary of the oom killer context. */
+	pr_info("oom-kill:constraint=%s,nodemask=%*pbl",
+			oom_constraint_text[oc->constraint],
+			nodemask_pr_args(oc->nodemask));
+	cpuset_print_current_mems_allowed();
+	pr_cont(",task=%s,pid=%d,uid=%d\n", victim->comm, victim->pid,
+		from_kuid(&init_user_ns, task_uid(victim)));
+}
+
 static void dump_header(struct oom_control *oc, struct task_struct *p)
 {
 	nodemask_t *nm = (oc->nodemask) ? oc->nodemask : &cpuset_current_mems_allowed;
@@ -410,7 +421,6 @@ static void dump_header(struct oom_control *oc, struct task_struct *p)
 	if (!IS_ENABLED(CONFIG_COMPACTION) && oc->order)
 		pr_warn("COMPACTION is disabled!!!\n");
 
-	cpuset_print_current_mems_allowed();
 	dump_stack();
 	if (oc->memcg)
 		mem_cgroup_print_oom_info(oc->memcg, p);
@@ -421,6 +431,8 @@ static void dump_header(struct oom_control *oc, struct task_struct *p)
 
 	if (sysctl_oom_dump_tasks)
 		dump_tasks(oc->memcg, oc->nodemask);
+	if (p)
+		dump_oom_summary(oc, p);
 }
 
 /*

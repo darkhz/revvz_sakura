@@ -3142,11 +3142,11 @@ void warn_alloc(gfp_t gfp_mask, const char *fmt, ...)
 	va_start(args, fmt);
 	vaf.fmt = fmt;
 	vaf.va = &args;
-	pr_cont("%pV", &vaf);
+	pr_cont(", mode:%#x(%pGg)\n", gfp_mask, &gfp_mask);
 	va_end(args);
 
-	pr_cont(", mode:%#x(%pGg)\n", gfp_mask, &gfp_mask);
-
+	cpuset_print_current_mems_allowed();
+	pr_cont("\n");
 	dump_stack();
 	warn_alloc_show_mem(gfp_mask);
 }
