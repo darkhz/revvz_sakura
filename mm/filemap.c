@@ -886,13 +886,6 @@ void wake_up_page_bit(struct page *page, int bit_nr)
 }
 EXPORT_SYMBOL(wake_up_page_bit);
 
-static void wake_up_page(struct page *page, int bit)
-{
-	if (!PageWaiters(page))
-		return;
-	wake_up_page_bit(page, bit);
-}
-
 /*
  * A choice of three behaviors for wait_on_page_bit_common():
  */
@@ -916,7 +909,6 @@ static inline int wait_on_page_bit_common(wait_queue_head_t *q,
 	bool bit_is_set;
 	bool thrashing = false;
 	bool delayacct = false;
-	unsigned long pflags;
 	int ret = 0;
 
 	if (bit_nr == PG_locked &&
@@ -937,10 +929,7 @@ static inline int wait_on_page_bit_common(wait_queue_head_t *q,
 		spin_lock_irq(&q->lock);
 
 		if (likely(list_empty(&wait->task_list))) {
-			if (lock)
-				__add_wait_queue_tail_exclusive(q, wait);
-			else
-				__add_wait_queue(q, wait);
+			__add_wait_queue_tail(q, wait);
 			SetPageWaiters(page);
 		}
 
