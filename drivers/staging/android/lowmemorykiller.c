@@ -93,22 +93,6 @@ static bool test_tsk_lmk_waiting(struct task_struct *p)
 	return false;
 }
 
-static int test_task_state(struct task_struct *p, int state)
-{
-	struct task_struct *t;
-
-	for_each_thread(p, t) {
-		task_lock(t);
-		if (t->state & state) {
-			task_unlock(t);
-			return 1;
-		}
-		task_unlock(t);
-	}
-
-	return 0;
-}
-
 static unsigned long lowmem_count(struct shrinker *s,
 				  struct shrink_control *sc)
 {
