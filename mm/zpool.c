@@ -72,8 +72,7 @@ int zpool_unregister_driver(struct zpool_driver *driver)
 }
 EXPORT_SYMBOL(zpool_unregister_driver);
 
-/* this assumes @type is null-terminated. */
-static struct zpool_driver *zpool_get_driver(const char *type)
+static struct zpool_driver *zpool_get_driver(char *type)
 {
 	struct zpool_driver *driver;
 
