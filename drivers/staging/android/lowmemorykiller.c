@@ -43,6 +43,8 @@
 #include <linux/rcupdate.h>
 #include <linux/profile.h>
 #include <linux/notifier.h>
+#include <linux/vmpressure.h>
+
 
 #define CONFIG_CONVERT_ADJ_TO_SCORE_ADJ
 
@@ -74,12 +76,26 @@ static bool kill_one_more;
 			pr_info(x);			\
 	} while (0)
 
+
+static bool test_tsk_lmk_waiting(struct task_struct *p)
+{
+	struct task_struct *t;
+
+	for_each_thread(p, t) {
+		task_lock(t);
+		if (unlikely(task_lmk_waiting(t))) {
+			task_unlock(t);
+			return true;
+		}
+		task_unlock(t);
+	}
+
+	return false;
+}
+
 static unsigned long lowmem_count(struct shrinker *s,
 				  struct shrink_control *sc)
 {
-	if (!enable_lmk)
-		return 0;
-
 	return global_page_state(NR_ACTIVE_ANON) +
 		global_page_state(NR_ACTIVE_FILE) +
 		global_page_state(NR_INACTIVE_ANON) +
@@ -137,16 +153,16 @@ again:
 		if (tsk->flags & PF_KTHREAD)
 			continue;
 
+		if (test_tsk_lmk_waiting(tsk)) {
+			lowmem_print(2, "%s (%d) is already killed, skip\n",
+				tsk->comm, tsk->pid);
+			continue;
+		}
+
 		p = find_lock_task_mm(tsk);
 		if (!p)
 			continue;
 
-		if (test_tsk_thread_flag(p, TIF_MEMDIE) &&
-		    time_before_eq(jiffies, lowmem_deathpending_timeout)) {
-			task_unlock(p);
-			rcu_read_unlock();
-			return 0;
-		}
 		oom_score_adj = p->signal->oom_score_adj;
 		if (oom_score_adj < min_score_adj) {
 			task_unlock(p);
@@ -169,27 +185,42 @@ again:
 		selected = p;
 		selected_tasksize = tasksize;
 		selected_oom_score_adj = oom_score_adj;
-		lowmem_print(2, "select '%s' (%d), adj %hd, size %d, to kill\n",
-			     p->comm, p->pid, oom_score_adj, tasksize);
+		lowmem_print(2, "select '%s' (%d, %d), adj %hd, size %d, to kill\n",
+			     p->comm, p->pid, p->tgid, oom_score_adj, tasksize);
 	}
 	if (selected) {
-		lowmem_print(1, "Killing '%s' (%d), adj %hd,\n" \
-				"   to free %ldkB on behalf of '%s' (%d) because\n" \
-				"   cache %ldkB is below limit %ldkB for oom_score_adj %hd\n",
+		task_lock(selected);
+		send_sig(SIGKILL, selected, 0);
+		if (selected->mm)
+			task_set_lmk_waiting(selected);
+		task_unlock(selected);
+		lowmem_print(1, "Killing '%s' (%d), adj %hd,\n"
+				 "   to free %ldkB on behalf of '%s' (%d) because\n"
+				 "   cache %ldkB is below limit %ldkB for oom_score_adj %hd\n"
+				 "   Free memory is %ldkB above reserved\n",
 			     selected->comm, selected->pid,
 			     selected_oom_score_adj,
 			     selected_tasksize * (long)(PAGE_SIZE / 1024),
 			     current->comm, current->pid,
 			     other_file * (long)(PAGE_SIZE / 1024),
 			     minfree * (long)(PAGE_SIZE / 1024),
-			     min_score_adj);
+			     min_score_adj,
+			     other_free * (long)(PAGE_SIZE / 1024));
 		lowmem_deathpending_timeout = jiffies + HZ;
 		rem += selected_tasksize;
+	}
+
+	if (kill_one_more) {
+		selected = NULL;
+		kill_one_more = false;
+		lowmem_print(1, "lowmem_scan kill one more process\n");
+		goto again;
 	}
 
 	lowmem_print(4, "lowmem_scan %lu, %x, return %lu\n",
 		     sc->nr_to_scan, sc->gfp_mask, rem);
 	rcu_read_unlock();
+
 	return rem;
 }
 
@@ -206,7 +237,22 @@ static struct shrinker lowmem_shrinker = {
 static int lmk_vmpressure_notifier(struct notifier_block *nb,
 			unsigned long action, void *data)
 {
- android/lmk: reset to common-3.18 version
+	unsigned long pressure = action;
+
+	if (pressure >= 95) {
+		if (!kill_one_more) {
+			kill_one_more = true;
+			lowmem_print(2, "vmpressure %ld, set kill_one_more true\n",
+				pressure);
+		}
+	} else {
+		if (kill_one_more) {
+			kill_one_more = false;
+			lowmem_print(2, "vmpressure %ld, set kill_one_more false\n",
+				pressure);
+		}
+	}
+
 	return 0;
 }
 
@@ -317,7 +363,3 @@ module_param_array_named(minfree, lowmem_minfree, uint, &lowmem_minfree_size,
 			 S_IRUGO | S_IWUSR);
 module_param_named(debug_level, lowmem_debug_level, uint, S_IRUGO | S_IWUSR);
 
-module_init(lowmem_init);
-module_exit(lowmem_exit);
-
-MODULE_LICENSE("GPL");
