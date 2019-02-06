@@ -1214,13 +1214,8 @@ static void steal_suitable_fallback(struct zone *zone, struct page *page,
 }
 
 /* Check whether there is a suitable fallback freepage with requested order. */
-<<<<<<< HEAD
-static int find_suitable_fallback(struct free_area *area, unsigned int order,
-					int migratetype, bool *can_steal, unsigned int start_order)
-=======
 static int find_suitable_fallback(struct free_area *area, unsigned int current_order,
 				  int migratetype, int start_order, bool *can_steal)
->>>>>>> b1b13df... mm: fix pageblock heuristic
 {
 	int i;
 	int fallback_mt;
@@ -1237,11 +1232,7 @@ static int find_suitable_fallback(struct free_area *area, unsigned int current_o
 		if (list_empty(&area->free_list[fallback_mt]))
 			continue;
 
-<<<<<<< HEAD
-		if (can_steal_fallback(order, migratetype, fallback_mt, start_order))
-=======
 		if (can_steal_fallback(current_order, start_order, migratetype, fallback_mt))
->>>>>>> b1b13df... mm: fix pageblock heuristic
 			*can_steal = true;
 
 		return fallback_mt;
@@ -1266,11 +1257,7 @@ __rmqueue_fallback(struct zone *zone, unsigned int order, int start_migratetype)
 				--current_order) {
 		area = &(zone->free_area[current_order]);
 		fallback_mt = find_suitable_fallback(area, current_order,
-<<<<<<< HEAD
-				start_migratetype, &can_steal, order);
-=======
 			start_migratetype, order, &can_steal);
->>>>>>> b1b13df... mm: fix pageblock heuristic
 		if (fallback_mt == -1)
 			continue;
 
