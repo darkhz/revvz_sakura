@@ -3199,6 +3199,7 @@ static struct device_node *mdss_dsi_find_panel_of_node(
 			ESD_interval = 500;
 		}
 #endif
+
 		if (!strcmp(panel_name, "qcom,mdss_dsi_ili7807_fhdplus_video")){
 #ifdef CONFIG_WPONIT_ADJUST_FUN
 			white_point_num_r = 653332;
