@@ -174,6 +174,11 @@ struct flash_regulator_data {
 	u32			max_volt_uv;
 };
 
+#ifdef CONFIG_FLASHLIGHT_SAKURA
+char flashlight[] = {"flashlight"};
+char flashlight_switch[] = {"led:switch"};
+struct led_trigger *flashlight_switch_trigger = NULL;
+#endif
 /*
  * Configurations for each individual LED
  */
@@ -1886,6 +1891,18 @@ static void qpnp_flash_led_brightness_set(struct led_classdev *led_cdev,
 	queue_work(led->ordered_workq, &flash_node->work);
 }
 
+#ifdef CONFIG_FLASHLIGHT_SAKURA
+/* lancelot add for mi flashlight*/
+static void mido_flash_led_brightness_set(struct led_classdev *led_cdev,
+						enum led_brightness value)
+{
+	printk(KERN_ERR "lancelot sakura mido_flash_led_brightness_set value %d.\n", value);
+	qpnp_flash_led_brightness_set(led_cdev,value);
+	led_trigger_event(flashlight_switch_trigger,(value?1:0));
+}
+/* lancelot add end*/
+#endif
+
 static int qpnp_flash_led_init_settings(struct qpnp_flash_led *led)
 {
 	int rc;
@@ -2548,6 +2565,13 @@ static int qpnp_flash_led_probe(struct platform_device *pdev)
 			return rc;
 		}
 
+#ifdef CONFIG_FLASHLIGHT_SAKURA
+		if (!strncmp(led->flash_node[i].cdev.name,flashlight,strlen(flashlight)))
+		{
+			led->flash_node[i].cdev.brightness_set = mido_flash_led_brightness_set;
+		}
+#endif
+
 		rc = of_property_read_string(temp, "qcom,default-led-trigger",
 				&led->flash_node[i].cdev.default_trigger);
 		if (rc < 0) {
@@ -2573,6 +2597,13 @@ static int qpnp_flash_led_probe(struct platform_device *pdev)
 			dev_err(&pdev->dev, "Unable to register led\n");
 			goto error_led_register;
 		}
+
+#ifdef CONFIG_FLASHLIGHT_SAKURA
+		if (!strncmp(led->flash_node[i].cdev.name,flashlight_switch,strlen(flashlight_switch)))
+		{
+			flashlight_switch_trigger = led->flash_node[i].cdev.trigger;
+		}
+#endif
 
 		led->flash_node[i].cdev.dev->of_node = temp;
 
