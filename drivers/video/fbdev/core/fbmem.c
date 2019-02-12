@@ -1077,6 +1077,13 @@ fb_blank(struct fb_info *info, int blank)
 	event.info = info;
 	event.data = &blank;
 
+	#ifdef CONFIG_PROJECT_SAKURA
+	/*fast tp suspend in LPWG*/
+	if (blank == FB_BLANK_POWERDOWN){
+		fb_notifier_call_chain(FB_EVENT_BLANK, &event);
+	}
+	#endif
+
 	early_ret = fb_notifier_call_chain(FB_EARLY_EVENT_BLANK, &event);
 
 	if (info->fbops->fb_blank)

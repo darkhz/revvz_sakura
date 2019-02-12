@@ -63,6 +63,14 @@ extern int LCM_effect[4];
 extern int LCM_effect[3];
 #endif
 
+#if defined(CONFIG_WPONIT_ADJUST_FUN)
+extern uint32_t white_point_num_x;
+extern uint32_t white_point_num_y;
+extern uint32_t white_point_num_r;
+extern uint32_t white_point_num_g;
+extern uint32_t white_point_num_b;
+#endif
+
 #ifdef CONFIG_FB_MSM_TRIPLE_BUFFER
 #define MDSS_FB_NUM 3
 #else

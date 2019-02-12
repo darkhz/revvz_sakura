@@ -3189,6 +3189,19 @@ static struct device_node *mdss_dsi_find_panel_of_node(
 			ESD_interval = 500;
 		}
 #endif
+		if (!strcmp(panel_name, "qcom,mdss_dsi_ili7807_fhdplus_video")){
+#ifdef CONFIG_WPONIT_ADJUST_FUN
+			white_point_num_r = 653332;
+			white_point_num_g = 291664;
+			white_point_num_b = 154054;
+#endif
+		}else if (!strcmp(panel_name, "qcom,mdss_dsi_hx8399c_fhdplus_video")){
+#ifdef CONFIG_WPONIT_ADJUST_FUN
+			white_point_num_r = 656333;
+			white_point_num_g = 288654;
+			white_point_num_b = 146057;
+#endif
+		}
 		mdss_node = of_parse_phandle(pdev->dev.of_node,
 			"qcom,mdss-mdp", 0);
 		if (!mdss_node) {
