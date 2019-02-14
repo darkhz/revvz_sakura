@@ -8,4 +8,4 @@ git clone https://github.com/Revanth/AnyKernel2 zip
 cp -r output/arch/arm64/boot/Image.gz-dtb zip/
 cd zip
 mv Image.gz-dtb zImage 
-zip -r ThunderStorm-Sakura-V1.zip *
+zip -r ThunderStorm-Sakura-V1.1.zip *
