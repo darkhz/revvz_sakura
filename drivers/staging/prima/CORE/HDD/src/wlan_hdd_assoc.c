@@ -545,8 +545,8 @@ void hdd_copy_vht_caps(struct ieee80211_vht_cap *hdd_vht_cap,
             (IEEE80211_VHT_CAP_SUPP_CHAN_WIDTH_160MHZ >>
             VHT_CAP_SUPP_CHAN_WIDTH_MASK_SHIFT))
             hdd_vht_cap->vht_cap_info |=
-                temp_vht_cap <<
-                IEEE80211_VHT_CAP_SUPP_CHAN_WIDTH_160MHZ;
+            temp_vht_cap <<
+            IEEE80211_VHT_CAP_SUPP_CHAN_WIDTH_160MHZ;
         if (roam_vht_cap->supportedChannelWidthSet &
             (IEEE80211_VHT_CAP_SUPP_CHAN_WIDTH_160_80PLUS80MHZ >>
             VHT_CAP_SUPP_CHAN_WIDTH_MASK_SHIFT))
