@@ -170,7 +170,7 @@ static int wcd_cpe_get_sfr_dump(struct wcd_cpe_core *core)
 	dump_seg.type = CPE_SVC_DATA_MEM;
 	dump_seg.cpe_addr = core->sfr_buf_addr;
 	dump_seg.size = core->sfr_buf_size;
-	dump_seg.data = sfr_dump;
+	dump_seg.data = core->cpe_dump_v_addr;
 	dev_dbg(core->dev,
 		"%s: reading SFR from CPE, size = %zu\n",
 		__func__, core->sfr_buf_size);
