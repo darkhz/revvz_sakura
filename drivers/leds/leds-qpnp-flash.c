@@ -1751,13 +1751,7 @@ static void qpnp_flash_led_work(struct work_struct *work)
 			}
 			led->fault_reg = temp;
 		}
-	} else {
-		pr_err("Both Torch and Flash cannot be select at same time\n");
-		for (i = 0; i < led->num_leds; i++)
-			led->flash_node[i].flash_on = false;
-		goto turn_off;
-	}
-
+	} 
 	flash_node->flash_on = true;
 	mutex_unlock(&led->flash_led_lock);
 
