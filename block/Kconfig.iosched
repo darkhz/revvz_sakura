@@ -71,6 +71,18 @@ config IOSCHED_BFQ
 	a low latency to interactive and soft real-time applications.
 	Details in Documentation/block/bfq-iosched.txt
 
+config IOSCHED_SIO
+	tristate "Simple I/O scheduler"
+	default y
+
+config IOSCHED_ANXIETY
+	tristate "Anxiety I/O scheduler"
+	default y
+	---help---
+	  The Anxiety I/O scheduler prioritizes latency over everything
+		else. When a request comes in, it will use a lighweight
+		selection algorithm to swiftly process the current pending task.
+
 config BFQ_GROUP_IOSCHED
 	bool "BFQ hierarchical scheduling support"
 	depends on IOSCHED_BFQ && BLK_CGROUP
@@ -104,9 +116,6 @@ choice
 		  any workload. It also tries to guarantee low latency to
 		  interactive and soft real-time applications.
 
-	config DEFAULT_MAPLE
-		bool "Maple" if IOSCHED_MAPLE=y
-
 	config DEFAULT_NOOP
 		bool "No-op"
 
@@ -122,7 +131,6 @@ config DEFAULT_IOSCHED
 	default "bfq" if DEFAULT_BFQ
 	default "noop" if DEFAULT_NOOP
 	default "zen" if DEFAULT_ZEN
-	default "maple" if DEFAULT_MAPLE
 	
 endmenu
 

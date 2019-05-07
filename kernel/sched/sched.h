@@ -659,6 +659,12 @@ struct rq {
 	unsigned long last_sched_tick;
 #endif
 	int skip_clock_update;
+	
+	/* time-based average load */
+	u64 nr_last_stamp;
+	unsigned int ave_nr_running;
+	u64 nr_running_integral;
+	seqcount_t ave_seqcnt;
 
 	/* capture load from *all* tasks on this cpu: */
 	struct load_weight load;
@@ -819,6 +825,25 @@ DECLARE_PER_CPU_SHARED_ALIGNED(struct rq, runqueues);
 #define task_rq(p)		cpu_rq(task_cpu(p))
 #define cpu_curr(cpu)		(cpu_rq(cpu)->curr)
 #define raw_rq()		raw_cpu_ptr(&runqueues)
+
+struct nr_stats_s {
+	/* time-based average load */
+	u64 nr_last_stamp;
+	unsigned int ave_nr_running;
+	seqcount_t ave_seqcnt;
+};
+
+/* 27 ~= 134217728ns = 134.2ms
+ * 26 ~=  67108864ns =  67.1ms
+ * 25 ~=  33554432ns =  33.5ms
+ * 24 ~=  16777216ns =  16.8ms
+ */
+#define NR_AVE_PERIOD_EXP	27
+#define NR_AVE_SCALE(x)		((x) << FSHIFT)
+#define NR_AVE_PERIOD		(1 << NR_AVE_PERIOD_EXP)
+#define NR_AVE_DIV_PERIOD(x)	((x) >> NR_AVE_PERIOD_EXP)
+
+DECLARE_PER_CPU(struct nr_stats_s, runqueue_stats);
 
 static inline u64 rq_clock(struct rq *rq)
 {
@@ -1777,6 +1802,7 @@ struct sched_class {
 	void (*migrate_task_rq)(struct task_struct *p, int next_cpu);
 
 	void (*post_schedule) (struct rq *this_rq);
+	void (*task_waking) (struct task_struct *task);
 	void (*task_woken) (struct rq *this_rq, struct task_struct *task);
 
 	void (*set_cpus_allowed)(struct task_struct *p,
@@ -1956,6 +1982,54 @@ static inline void rq_last_tick_reset(struct rq *rq)
 	rq->last_sched_tick = jiffies;
 #endif
 }
+
+
+static inline unsigned int do_avg_nr_running(struct rq *rq)
+{
+
+	struct nr_stats_s *nr_stats = &per_cpu(runqueue_stats, rq->cpu);
+	unsigned int ave_nr_running = nr_stats->ave_nr_running;
+	s64 nr, deltax;
+
+	deltax = rq->clock_task - nr_stats->nr_last_stamp;
+	nr = NR_AVE_SCALE(rq->nr_running);
+
+	if (deltax > NR_AVE_PERIOD)
+		ave_nr_running = nr;
+	else
+		ave_nr_running +=
+			NR_AVE_DIV_PERIOD(deltax * (nr - ave_nr_running));
+
+	return ave_nr_running;
+}
+
+static inline void inc_nr_running(struct rq *rq)
+{
+
+	struct nr_stats_s *nr_stats = &per_cpu(runqueue_stats, rq->cpu);
+
+	sched_update_nr_prod(cpu_of(rq), rq->nr_running, true);
+
+	write_seqcount_begin(&nr_stats->ave_seqcnt);
+	nr_stats->ave_nr_running = do_avg_nr_running(rq);
+	nr_stats->nr_last_stamp = rq->clock_task;
+	rq->nr_running++;
+
+	write_seqcount_end(&nr_stats->ave_seqcnt);
+}
+
+static inline void dec_nr_running(struct rq *rq)
+{
+	struct nr_stats_s *nr_stats = &per_cpu(runqueue_stats, rq->cpu);
+
+	sched_update_nr_prod(cpu_of(rq), rq->nr_running, false);
+	write_seqcount_begin(&nr_stats->ave_seqcnt);
+	nr_stats->ave_nr_running = do_avg_nr_running(rq);
+	nr_stats->nr_last_stamp = rq->clock_task;
+	rq->nr_running--;
+	write_seqcount_end(&nr_stats->ave_seqcnt);
+}
+
 
 extern void update_rq_clock(struct rq *rq);
 

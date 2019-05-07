@@ -27,6 +27,11 @@
 #include <linux/uaccess.h>
 #include <linux/msm-bus.h>
 #include <linux/pm_qos.h>
+#include <linux/lcd_notify.h>
+
+#ifdef CONFIG_STATE_NOTIFIER
+#include <linux/state_notifier.h>
+#endif
 
 #include "mdss.h"
 #include "mdss_panel.h"
@@ -40,10 +45,6 @@
 
 #define XO_CLK_RATE	19200000
 #define CMDLINE_DSI_CTL_NUM_STRING_LEN 2
-
-#ifdef CONFIG_STATE_NOTIFIER
-#include <linux/state_notifier.h>
-#endif
 
 /* Master structure to hold all the information about the DSI/panel */
 static struct mdss_dsi_data *mdss_dsi_res;
@@ -2883,9 +2884,14 @@ static int mdss_dsi_event_handler(struct mdss_panel_data *pdata,
 		break;
 	case MDSS_EVENT_POST_PANEL_ON:
 		rc = mdss_dsi_post_panel_on(pdata);
+		lcd_notifier_call_chain(LCD_EVENT_ON_END, NULL);
+		#ifdef CONFIG_STATE_NOTIFIER
+		state_resume();
+		#endif		
 		break;
-
 	case MDSS_EVENT_BLANK:
+		pr_err("lcd-time event blank begin\n");
+		lcd_notifier_call_chain(LCD_EVENT_OFF_START, NULL);
 		power_state = (int) (unsigned long) arg;
 		if (ctrl_pdata->off_cmds.link_state == DSI_HS_MODE)
 			rc = mdss_dsi_blank(pdata, power_state);
@@ -2894,10 +2900,14 @@ static int mdss_dsi_event_handler(struct mdss_panel_data *pdata,
 	case MDSS_EVENT_PANEL_OFF:
 		power_state = (int) (unsigned long) arg;
 		disable_esd_thread();
+		lcd_notifier_call_chain(LCD_EVENT_OFF_END, NULL);
 		ctrl_pdata->ctrl_state &= ~CTRL_STATE_MDP_ACTIVE;
 		if (ctrl_pdata->off_cmds.link_state == DSI_LP_MODE)
 			rc = mdss_dsi_blank(pdata, power_state);
 		rc = mdss_dsi_off(pdata, power_state);
+		#ifdef CONFIG_STATE_NOTIFIER
+		state_suspend();
+		#endif		
 		atomic_set(&ctrl_pdata->disp_is_on, 0);
 		break;
 	case MDSS_EVENT_CONT_SPLASH_FINISH:

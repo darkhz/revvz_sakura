@@ -1,0 +1,20 @@
+config MSM_HOTPLUG
+	bool "MSM hotplug by [Fluxi]"
+	depends on HOTPLUG_CPU
+	default n
+	help
+	  The MSM hotplug driver controls on-/offlining of additional cores based on current cpu load.
+
+config ASMP
+	bool "Multi-core automatic hotplug support"
+	depends on SMP
+	default n
+	help
+	Automatically hotplugs the multiple cpu cores on and off
+	based on cpu load and suspend stat
+
+config THUNDERPLUG_CONTROL
+	bool "Enable plugging down/up of cores using powersuspend"
+	help
+	  This driver uses powersuspend to take down the cpu cores
+	  on a octa core device.

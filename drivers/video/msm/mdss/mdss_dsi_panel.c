@@ -55,6 +55,8 @@ int LCM_effect[3] = {0x2,0xf0,0xf00};
 #endif
 DEFINE_LED_TRIGGER(bl_led_trigger);
 
+extern void lazyplug_enter_lazy(bool enter, bool video);
+
 bool display_on = true;
 
 bool is_display_on()
@@ -931,9 +933,12 @@ static int mdss_dsi_panel_on(struct mdss_panel_data *pdata)
 		pr_err("%s: Invalid input data\n", __func__);
 		return -EINVAL;
 	}
-
+	
+	display_on = true;
+	lazyplug_enter_lazy(false, false);
+	
 #ifdef CONFIG_POWERSUSPEND
-       set_power_suspend_state_panel_hook(POWER_SUSPEND_INACTIVE);
+	set_power_suspend_state_panel_hook(POWER_SUSPEND_INACTIVE);
 #endif
 
 	pinfo = &pdata->panel_info;
@@ -1142,6 +1147,10 @@ static int mdss_dsi_post_panel_on(struct mdss_panel_data *pdata)
 		mdss_dsi_panel_cmds_send(ctrl, cmds, CMD_REQ_COMMIT);
 	}
 
+#ifdef CONFIG_POWERSUSPEND
+	set_power_suspend_state_panel_hook(POWER_SUSPEND_ACTIVE);
+#endif
+	
 	mdss_dsi_post_panel_on_hdmi(pinfo);
 
 end:
@@ -1193,12 +1202,9 @@ static int mdss_dsi_panel_off(struct mdss_panel_data *pdata)
 		mdss_dsi_panel_cmds_send(ctrl, &ctrl->off_cmds, CMD_REQ_COMMIT);
 
 	mdss_dsi_panel_off_hdmi(ctrl, pinfo);
-
-	display_on = false;
 	
-#ifdef CONFIG_POWERSUSPEND
-       set_power_suspend_state_panel_hook(POWER_SUSPEND_ACTIVE);
-#endif
+	display_on = false;
+	lazyplug_enter_lazy(true, false);
 
 end:
 	/* clear idle state */

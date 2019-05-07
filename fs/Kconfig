@@ -172,6 +172,12 @@ source "fs/configfs/Kconfig"
 
 endmenu
 
+config DYNAMIC_FSYNC
+	bool "dynamic file sync control"
+	default y
+	help
+	  An experimental file sync control using new power_suspend driver
+
 menuconfig MISC_FILESYSTEMS
 	bool "Miscellaneous filesystems"
 	default y
