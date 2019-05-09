@@ -1273,7 +1273,6 @@ static void qpnp_flash_led_work(struct work_struct *work)
 	int rc, brightness = flash_node->cdev.brightness;
 	int max_curr_avail_ma = 0;
 	int total_curr_ma = 0;
-	int i;
 	u8 val = 0;
 	uint temp;
 
