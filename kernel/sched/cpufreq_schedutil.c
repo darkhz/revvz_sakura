@@ -31,7 +31,6 @@ struct sugov_tunables {
 	unsigned int hispeed_load;
 	unsigned int hispeed_freq;
 	bool pl;
-	bool iowait_boost_enable;
 };
 struct sugov_policy {
 	struct cpufreq_policy *policy;
@@ -190,15 +189,11 @@ static void sugov_get_util(unsigned long *util, unsigned long *max, int cpu)
 static void sugov_set_iowait_boost(struct sugov_cpu *sg_cpu, u64 time,
 				   unsigned int flags)
 {
-	struct sugov_policy *sg_policy = sg_cpu->sg_policy;
-
-	if (!sg_policy->tunables->iowait_boost_enable)
-		return;
-
 	/* Clear iowait_boost if the CPU apprears to have been idle. */
 	if (sg_cpu->iowait_boost) {
 		s64 delta_ns = time - sg_cpu->last_update;
- 		if (delta_ns > TICK_NSEC) {
+
+		if (delta_ns > TICK_NSEC) {
 			sg_cpu->iowait_boost = 0;
 			sg_cpu->iowait_boost_pending = false;
 		}
@@ -625,6 +620,7 @@ static ssize_t pl_store(struct gov_attr_set *attr_set, const char *buf,
 	struct sugov_tunables *tunables = to_sugov_tunables(attr_set);
 	if (kstrtobool(buf, &tunables->pl))
 		return -EINVAL;
+
 	return count;
 }
 
@@ -663,7 +659,6 @@ static struct attribute *sugov_attributes[] = {
 	&hispeed_load.attr,
 	&hispeed_freq.attr,
 	&pl.attr,
-	&iowait_boost_enable.attr,
 	NULL
 };
 static struct kobj_type sugov_tunables_ktype = {
