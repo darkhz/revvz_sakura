@@ -68,7 +68,7 @@
 #include <linux/module.h>
 #include <linux/slab.h>
 #include <linux/cpufreq.h>
-#include <linux/state_notifier.h>
+#include <linux/lcd_notify.h>
 
 //#define DEBUG_LAZYPLUG
 #undef DEBUG_LAZYPLUG
@@ -83,7 +83,7 @@
 
 static DEFINE_MUTEX(lazyplug_mutex);
 static DEFINE_MUTEX(lazymode_mutex);
-static struct notifier_block state_notifier_hook;
+static struct notifier_block lcd_notif;
 
 static struct delayed_work lazyplug_work;
 static struct delayed_work lazyplug_boost;
@@ -187,7 +187,7 @@ static unsigned int __read_mostly *nr_run_profiles[] = {
 };
 
 #define NR_RUN_ECO_MODE_PROFILE	3
-#define NR_RUN_HYSTERESIS_OCTA	16
+#define NR_RUN_HYSTERESIS_OCTA	14
 #define NR_RUN_HYSTERESIS_QUAD	8
 #define NR_RUN_HYSTERESIS_DUAL	4
 
@@ -424,23 +424,26 @@ void lazyplug_resume(void)
 		msecs_to_jiffies(10));
 }
 
-static int state_notifier_call(struct notifier_block *this,
-				unsigned long event, void *data)
+static int lcd_notifier_callback(struct notifier_block *this,
+								unsigned long event, void *data)
 {
-	switch (event) {
-		case STATE_NOTIFIER_ACTIVE:
-			lazyplug_resume();
-			break;
-		case STATE_NOTIFIER_SUSPEND:
+	switch (event) 
+	{
+		case LCD_EVENT_OFF_START:
 			lazyplug_suspend();
 			break;
+		case LCD_EVENT_ON_END:
+			lazyplug_resume();
+			break;
+			
 		default:
 			break;
 	}
-	
+
 	return 0;
 }
 
+/*
 static unsigned int Lnr_run_profile_sel = 0;
 static bool Lprevious_state = false;
 void lazyplug_enter_lazy(bool enter, bool video)
@@ -452,14 +455,11 @@ void lazyplug_enter_lazy(bool enter, bool video)
 	} else if (!enter && Lprevious_state) {
 		pr_info("lazyplug: exiting lazy mode\n");
 		nr_run_profile_sel = Lnr_run_profile_sel;
-		// if called from vidc, use conservative profile; otherwise use eco-conservative mode
-		nr_run_profile_sel = (video ? 2 : 4);
-		pr_info("lazyplug: entering eco-conservative mode with profile %d\n",
-				nr_run_profile_sel);
 		Lprevious_state = false;
 	}
 	mutex_unlock(&lazymode_mutex);
 }
+*/
 
 int __init lazyplug_init(void)
 {
@@ -481,11 +481,11 @@ int __init lazyplug_init(void)
 		nr_run_profile_sel = NR_RUN_ECO_MODE_PROFILE;
 	}
 
-	state_notifier_hook.notifier_call = state_notifier_call;
-	if (state_register_client(&state_notifier_hook))
-		pr_info("%s state_notifier hook create failed!\n", __FUNCTION__);
-
-
+	lcd_notif.notifier_call = lcd_notifier_callback;
+	if (lcd_register_client(&lcd_notif) != 0) {
+		pr_err("%s: Failed to register lcd callback\n", __func__);
+		return -EFAULT;
+	}
 	lazyplug_wq = alloc_workqueue("lazyplug",
 				WQ_HIGHPRI | WQ_UNBOUND, 1);
 	lazyplug_boost_wq = alloc_workqueue("lplug_boost",
