@@ -893,6 +893,10 @@ config MSM_BAM_DMUX
 		allows for G-Link communication with remote subsystems that are
 		external to the System-on-Chip.
 
+config STATE_NOTIFIER
+        bool "State Notifier"
+	default y
+
 	config MSM_BGCOM_INTERFACE
 	bool "Driver support for Blackghost Communication"
 	depends on MSM_BGCOM
