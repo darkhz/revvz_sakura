@@ -20,6 +20,7 @@
 
 static const char * const backends[] = {
 	"lzo",
+<<<<<<< HEAD
 #if IS_ENABLED(CONFIG_CRYPTO_LZ4)
 	"lz4",
 #endif
@@ -32,6 +33,8 @@ static const char * const backends[] = {
 #if IS_ENABLED(CONFIG_CRYPTO_842)
 	"842",
 #endif
+=======
+>>>>>>> 6bd5896b8d97... Removed unused compression algorithms for zram
 #if IS_ENABLED(CONFIG_CRYPTO_ZSTD)
 	"zstd",
 #endif
