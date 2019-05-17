@@ -294,6 +294,7 @@ static DEFINE_SPINLOCK(vmap_area_lock);
 LIST_HEAD(vmap_area_list);
 static LLIST_HEAD(vmap_purge_list);
 static struct rb_root vmap_area_root = RB_ROOT;
+static bool vmap_initialized __read_mostly;
 
 /*
  * This kmem_cache is used for vmap_area objects. Instead of
@@ -958,6 +959,9 @@ static struct vmap_area *alloc_vmap_area(unsigned long size,
 	BUG_ON(!size);
 	BUG_ON(offset_in_page(size));
 	BUG_ON(!is_power_of_2(align));
+
+	if (unlikely(!vmap_initialized))
+		return ERR_PTR(-EBUSY);
 
 	might_sleep();
 
@@ -1816,6 +1820,7 @@ void __init vmalloc_init(void)
 	 * Now we can initialize a free vmap space.
 	 */
 	vmap_init_free_space();
+	vmap_initialized = true;
 }
 
 /**
@@ -2964,7 +2969,7 @@ pvm_determine_end_from_reverse(struct vmap_area **va, unsigned long align)
 {
 	unsigned long vmalloc_end = VMALLOC_END & ~(align - 1);
 	unsigned long addr;
-	
+
 	if (likely(*va)) {
 		list_for_each_entry_from_reverse((*va),
 				&free_vmap_area_list, list) {
@@ -3099,6 +3104,7 @@ retry:
 		area = (area + nr_vms - 1) % nr_vms;
 		if (area == term_area)
 			break;
+
 		start = offsets[area];
 		end = start + sizes[area];
 		va = pvm_find_va_enclose_addr(base + end);
@@ -3110,6 +3116,16 @@ retry:
 
 		start = base + offsets[area];
 		size = sizes[area];
+
+		va = pvm_find_va_enclose_addr(start);
+		if (WARN_ON_ONCE(va == NULL))
+			/* It is a BUG(), but trigger recovery instead. */
+			goto recovery;
+
+		type = classify_va_fit_type(va, start, size);
+		if (WARN_ON_ONCE(type == NOTHING_FIT))
+			/* It is a BUG(), but trigger recovery instead. */
+			goto recovery;
 
 		va = pvm_find_va_enclose_addr(start);
 		if (WARN_ON_ONCE(va == NULL))
