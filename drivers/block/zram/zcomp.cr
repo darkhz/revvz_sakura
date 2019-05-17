@@ -19,8 +19,32 @@
 #include "zcomp.h"
 
 static const char * const backends[] = {
+<<<<<<< HEAD
 	"lzo",
+<<<<<<< HEAD
+#if IS_ENABLED(CONFIG_CRYPTO_LZ4)
+	"lz4",
+#endif
+#if IS_ENABLED(CONFIG_CRYPTO_DEFLATE)
+	"deflate",
+#endif
+#if IS_ENABLED(CONFIG_CRYPTO_LZ4HC)
+	"lz4hc",
+#endif
+#if IS_ENABLED(CONFIG_CRYPTO_842)
+	"842",
+=======
 	"zstd",
+	"lzo",
+#ifdef CONFIG_ZRAM_LZ4_COMPRESS
+	"lz4",
+>>>>>>> 1c2fafac81b4... TODO #3
+#endif
+=======
+>>>>>>> 6bd5896b8d97... Removed unused compression algorithms for zram
+#if IS_ENABLED(CONFIG_CRYPTO_ZSTD)
+	"zstd",
+#endif
 
 	NULL
 };
