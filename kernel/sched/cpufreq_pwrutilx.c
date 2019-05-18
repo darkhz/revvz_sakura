@@ -186,9 +186,7 @@ static unsigned int get_next_freq(struct pwrgov_policy *sg_policy,
 	struct cpufreq_policy *policy = sg_policy->policy;
 
 	//struct pwrgov_tunables *tunables = sg_policy->tunables;
-
-	struct pwrgov_tunables *tunables = sg_policy->tunables;
-
+	
 	unsigned int freq = arch_scale_freq_invariant() ?
 				policy->cpuinfo.max_freq : policy->cur;
 
@@ -506,11 +504,6 @@ static unsigned int pwrgov_next_freq_shared(struct pwrgov_cpu *sg_cpu, u64 time)
 	unsigned long util = 0, max = 1;
 	//unsigned int cap_max = SCHED_CAPACITY_SCALE;
 	//unsigned int cap_min = 0;
-
-	u64 last_freq_update_time = sg_policy->last_freq_update_time;
-	unsigned long util = 0, max = 1;
-	unsigned int cap_max = SCHED_CAPACITY_SCALE;
-	unsigned int cap_min = 0;
 
 	unsigned int j;
 

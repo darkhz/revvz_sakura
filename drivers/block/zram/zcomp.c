@@ -33,7 +33,7 @@ static const char * const backends[] = {
 	"842",
 #endif
 #if IS_ENABLED(CONFIG_CRYPTO_ZSTD)
-	zstd,
+	"zstd",
 #endif
 	NULL
 };
