@@ -134,6 +134,9 @@ static unsigned long one_ul = 1;
 static unsigned long long_max = LONG_MAX;
 static int one_hundred = 100;
 static int __maybe_unused one_thousand = 1000;
+#ifdef CONFIG_SCHED_WALT
+static int two_million = 2000000;
+#endif
 #ifdef CONFIG_PRINTK
 static int ten_thousand = 10000;
 #endif
@@ -360,15 +363,6 @@ static struct ctl_table kern_table[] = {
 		.maxlen		= sizeof(unsigned int),
 		.mode		= 0644,
 		.proc_handler	= proc_dointvec,
-	},
-	{
-		.procname	= "sched_min_task_util_for_boost_colocation",
-		.data		= &sysctl_sched_min_task_util_for_boost_colocation,
-		.maxlen		= sizeof(unsigned int),
-		.mode		= 0644,
-		.proc_handler	= proc_dointvec_minmax,
-		.extra1		= &zero,
-		.extra2		= &one_thousand,
 	},
 	{
 		.procname	= "sched_min_task_util_for_boost_colocation",
