@@ -516,8 +516,6 @@ static unsigned int pwrgov_next_freq_shared(struct pwrgov_cpu *sg_cpu, u64 time)
 
 		//unsigned int j_cap_max, j_cap_min;
 
-		unsigned int j_cap_max, j_cap_min;
-
 		s64 delta_ns;
 
 		/*
