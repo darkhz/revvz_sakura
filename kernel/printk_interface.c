@@ -15,6 +15,7 @@
 
 #include <linux/kobject.h>
 #include <linux/sysfs.h>
+#include <linux/module.h>
 #include "printk_interface.h"
 
 
