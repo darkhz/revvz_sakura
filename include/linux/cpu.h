@@ -196,6 +196,9 @@ extern void cpu_hotplug_mutex_held(void);
 extern void put_online_cpus(void);
 extern void cpu_hotplug_disable(void);
 extern void cpu_hotplug_enable(void);
+extern void cpus_read_lock(void);
+extern void cpus_read_unlock(void);
+extern void lockdep_assert_cpus_held(void);
 #define hotcpu_notifier(fn, pri)	cpu_notifier(fn, pri)
 #define __hotcpu_notifier(fn, pri)	__cpu_notifier(fn, pri)
 #define register_hotcpu_notifier(nb)	register_cpu_notifier(nb)
@@ -209,6 +212,9 @@ int cpu_down(unsigned int cpu);
 
 static inline void cpu_hotplug_begin(void) {}
 static inline void cpu_hotplug_done(void) {}
+static inline void cpus_read_lock(void) { }
+static inline void cpus_read_unlock(void) { }
+static inline void lockdep_assert_cpus_held(void) {}
 #define get_online_cpus()	do { } while (0)
 #define put_online_cpus()	do { } while (0)
 #define cpu_hotplug_disable()	do { } while (0)

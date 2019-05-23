@@ -217,6 +217,8 @@ static int cpu_hotplug_disabled;
 
 #ifdef CONFIG_HOTPLUG_CPU
 
+DEFINE_STATIC_PERCPU_RWSEM(cpu_hotplug_lock);
+
 static struct {
 	struct task_struct *active_writer;
 	/* wait queue to wake up the active_writer */
@@ -284,6 +286,23 @@ void put_online_cpus(void)
 
 }
 EXPORT_SYMBOL_GPL(put_online_cpus);
+
+void cpus_read_lock(void)
+{
+	percpu_down_read(&cpu_hotplug_lock);
+}
+EXPORT_SYMBOL_GPL(cpus_read_lock);
+
+void cpus_read_unlock(void)
+{
+	percpu_up_read(&cpu_hotplug_lock);
+}
+EXPORT_SYMBOL_GPL(cpus_read_unlock);
+
+void lockdep_assert_cpus_held(void)
+{
+	percpu_rwsem_assert_held(&cpu_hotplug_lock);
+}
 
 /*
  * This ensures that the hotplug operation can begin only when the
