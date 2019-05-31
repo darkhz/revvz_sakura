@@ -1146,45 +1146,6 @@ int dwc3_debugfs_init(struct dwc3 *dwc)
 		}
 	}
 
-	file = debugfs_create_file("trbs", S_IRUGO | S_IWUSR, root,
-			dwc, &dwc3_ep_trb_list_fops);
-	if (!file) {
-		dev_dbg(dwc->dev, "Can't create debugfs trbs\n");
-		goto err1;
-	}
-
-	file = debugfs_create_file("requests", S_IRUGO | S_IWUSR, root,
-			dwc, &dwc3_ep_req_list_fops);
-	if (!file) {
-		dev_dbg(dwc->dev, "Can't create debugfs requests\n");
-		goto err1;
-	}
-
-	file = debugfs_create_file("queued_reqs", S_IRUGO | S_IWUSR, root,
-			dwc, &dwc3_ep_req_queued_fops);
-	if (!file) {
-		dev_dbg(dwc->dev, "Can't create debugfs queued_reqs\n");
-		goto err1;
-	}
-
-	file = debugfs_create_file("int_events", S_IRUGO | S_IWUSR, root,
-			dwc, &dwc3_gadget_dbg_events_fops);
-	if (!file) {
-		dev_dbg(dwc->dev, "Can't create debugfs int_events\n");
-		goto err1;
-	}
-
-#ifdef CONFIG_IPC_LOGGING
-	dwc->dwc_ipc_log_ctxt = ipc_log_context_create(NUM_LOG_PAGES,
-					dev_name(dwc->dev), 0);
-	if (!dwc->dwc_ipc_log_ctxt) {
-		dev_err(dwc->dev, "Error getting ipc_log_ctxt\n");
-		goto err1;
-	}
-#endif
-
-	dbg_dwc3_data[count] = dwc;
-	count++;
 	return 0;
 
 err1:
