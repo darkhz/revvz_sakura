@@ -352,6 +352,11 @@ config NET_SCH_PLUG
 	  To compile this code as a module, choose M here: the
 	  module will be called sch_plug.
 
+config NET_SCH_CAKE
+	tristate "Common Applications Kept Enhanced Algorithm (CAKE)"
+	---help---
+	 Support for the CAKE algorithm.
+
 menuconfig NET_SCH_DEFAULT
 	bool "Allow override default queue discipline"
 	---help---
@@ -386,6 +391,9 @@ choice
 
 	config DEFAULT_PFIFO_FAST
 		bool "Priority FIFO Fast"
+	
+	config DEFAULT_CAKE
+		bool "CAKE Algorithm"
 endchoice
 
 config DEFAULT_NET_SCH
@@ -394,6 +402,7 @@ config DEFAULT_NET_SCH
 	default "fq" if DEFAULT_FQ
 	default "fq_codel" if DEFAULT_FQ_CODEL
 	default "sfq" if DEFAULT_SFQ
+	default "cake" if DEFAULT_CAKE
 	default "pfifo_fast"
 endif
 
