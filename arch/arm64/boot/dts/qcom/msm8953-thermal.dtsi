@@ -424,7 +424,7 @@
 		thermal-governor = "step_wise";
 		trips {
 			apc1_cpu0_trip: apc1-cpu0-trip {
-				temperature = <105000>;
+				temperature = <95000>;
 				hysteresis = <15000>;
 				type = "passive";
 			};
@@ -446,7 +446,7 @@
 		thermal-governor = "step_wise";
 		trips {
 			apc1_cpu1_trip: apc1-cpu1-trip {
-				temperature = <105000>;
+				temperature = <95000>;
 				hysteresis = <15000>;
 				type = "passive";
 			};
@@ -468,7 +468,7 @@
 		thermal-governor = "step_wise";
 		trips {
 			apc1_cpu2_trip: apc1-cpu2-trip {
-				temperature = <105000>;
+				temperature = <95000>;
 				hysteresis = <15000>;
 				type = "passive";
 			};
@@ -490,7 +490,7 @@
 		thermal-governor = "step_wise";
 		trips {
 			apc1_cpu3_trip: apc1-cpu3-trip {
-				temperature = <105000>;
+				temperature = <95000>;
 				hysteresis = <15000>;
 				type = "passive";
 			};
@@ -512,7 +512,7 @@
 		thermal-governor = "step_wise";
 		trips {
 			apc0_cpu0_trip: apc0-cpu0-trip {
-				temperature = <105000>;
+				temperature = <95000>;
 				hysteresis = <15000>;
 				type = "passive";
 			};
@@ -534,7 +534,7 @@
 		thermal-governor = "step_wise";
 		trips {
 			apc0_cpu1_trip: apc0-cpu1-trip {
-				temperature = <105000>;
+				temperature = <95000>;
 				hysteresis = <15000>;
 				type = "passive";
 			};
@@ -556,7 +556,7 @@
 		thermal-governor = "step_wise";
 		trips {
 			apc0_cpu2_trip: apc0-cpu2-trip {
-				temperature = <105000>;
+				temperature = <95000>;
 				hysteresis = <15000>;
 				type = "passive";
 			};
@@ -578,7 +578,7 @@
 		thermal-governor = "step_wise";
 		trips {
 			apc0_cpu3_trip: apc0-cpu3-trip {
-				temperature = <105000>;
+				temperature = <95000>;
 				hysteresis = <15000>;
 				type = "passive";
 			};
@@ -1111,7 +1111,7 @@
 
 		trips {
 			active-config0 {
-				temperature = <65000>;
+				temperature = <60000>;
 				hysteresis = <5000>;
 				type = "passive";
 			};
@@ -1126,22 +1126,22 @@
 
 		trips {
 			cpus_trip: cpus-trip {
-				temperature = <43000>;
+				temperature = <41000>;
 				hysteresis = <0>;
 				type = "passive";
 			};
 			modem_trip0: modem-trip0 {
-				temperature = <45000>;
+				temperature = <43000>;
 				hysteresis = <2000>;
 				type = "passive";
 			};
 			modem_trip1: modem-trip1 {
-				temperature = <48000>;
+				temperature = <45000>;
 				hysteresis = <3000>;
 				type = "passive";
 			};
 			modem_trip2: modem-trip2 {
-				temperature = <54000>;
+				temperature = <47000>;
 				hysteresis = <4000>;
 				type = "passive";
 			};
