@@ -101,6 +101,8 @@ ext4_file_write_iter(struct kiocb *iocb, struct iov_iter *from)
 	ret = generic_write_checks(iocb, from);
 	if (ret <= 0)
 		goto out;
+	if (unlikely(IS_IMMUTABLE(inode)))
+		return -EPERM;
 
 	/*
 	 * Unaligned direct AIO must be serialized among each other as zeroing
