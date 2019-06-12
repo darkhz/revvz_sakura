@@ -5204,9 +5204,6 @@ int ext4_setattr(struct dentry *dentry, struct iattr *attr)
 	int orphan = 0;
 	const unsigned int ia_valid = attr->ia_valid;
 
-	if (unlikely(ext4_forced_shutdown(EXT4_SB(inode->i_sb))))
-		return -EIO;
-
 	if (unlikely(IS_IMMUTABLE(inode)))
 		return -EPERM;
 

@@ -437,8 +437,8 @@ static enum lru_status shadow_lru_isolate(struct list_head *item,
 	inc_node_state(page_pgdat(virt_to_page(node)), WORKINGSET_NODERECLAIM);
 	mem_cgroup_inc_page_stat(virt_to_page(node),
 				 MEMCG_WORKINGSET_NODERECLAIM);
-	__radix_tree_delete_node(&mapping->page_tree, node,
-				 workingset_update_node, mapping);
+	if (!__radix_tree_delete_node(&mapping->page_tree, node))
+		BUG();
 
 	spin_unlock(&mapping->tree_lock);
 	ret = LRU_REMOVED_RETRY;

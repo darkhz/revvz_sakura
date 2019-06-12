@@ -15,6 +15,7 @@
 #define RECLAIM_WB_MIXED	0x0010u
 #define RECLAIM_WB_SYNC		0x0004u /* Unused, all reclaim async */
 #define RECLAIM_WB_ASYNC	0x0008u
+#define RECLAIM_WB_LRU		(RECLAIM_WB_ANON|RECLAIM_WB_FILE)
 
 #define show_reclaim_flags(flags)				\
 	(flags) ? __print_flags(flags, "|",			\
@@ -365,6 +366,114 @@ TRACE_EVENT(mm_vmscan_lru_shrink_inactive,
 		__entry->nr_scanned, __entry->nr_reclaimed,
 		__entry->priority,
 		show_reclaim_flags(__entry->reclaim_flags))
+);
+
+TRACE_EVENT(mm_vmscan_lru_shrink_active,
+
+	TP_PROTO(int nid, unsigned long nr_taken,
+		unsigned long nr_active, unsigned long nr_deactivated,
+		unsigned long nr_referenced, int priority, int file),
+
+	TP_ARGS(nid, nr_taken, nr_active, nr_deactivated, nr_referenced, priority, file),
+
+	TP_STRUCT__entry(
+		__field(int, nid)
+		__field(unsigned long, nr_taken)
+		__field(unsigned long, nr_active)
+		__field(unsigned long, nr_deactivated)
+		__field(unsigned long, nr_referenced)
+		__field(int, priority)
+		__field(int, reclaim_flags)
+	),
+
+	TP_fast_assign(
+		__entry->nid = nid;
+		__entry->nr_taken = nr_taken;
+		__entry->nr_active = nr_active;
+		__entry->nr_deactivated = nr_deactivated;
+		__entry->nr_referenced = nr_referenced;
+		__entry->priority = priority;
+		__entry->reclaim_flags = trace_reclaim_flags(file);
+	),
+
+	TP_printk("nid=%d nr_taken=%ld nr_active=%ld nr_deactivated=%ld nr_referenced=%ld priority=%d flags=%s",
+		__entry->nid,
+		__entry->nr_taken,
+		__entry->nr_active, __entry->nr_deactivated, __entry->nr_referenced,
+		__entry->priority,
+		show_reclaim_flags(__entry->reclaim_flags))
+);
+
+TRACE_EVENT(mm_vmscan_inactive_list_is_low,
+
+	TP_PROTO(int nid, int reclaim_idx,
+		unsigned long total_inactive, unsigned long inactive,
+		unsigned long total_active, unsigned long active,
+		unsigned long ratio, int file),
+
+	TP_ARGS(nid, reclaim_idx, total_inactive, inactive, total_active, active, ratio, file),
+
+	TP_STRUCT__entry(
+		__field(int, nid)
+		__field(int, reclaim_idx)
+		__field(unsigned long, total_inactive)
+		__field(unsigned long, inactive)
+		__field(unsigned long, total_active)
+		__field(unsigned long, active)
+		__field(unsigned long, ratio)
+		__field(int, reclaim_flags)
+	),
+
+	TP_fast_assign(
+		__entry->nid = nid;
+		__entry->reclaim_idx = reclaim_idx;
+		__entry->total_inactive = total_inactive;
+		__entry->inactive = inactive;
+		__entry->total_active = total_active;
+		__entry->active = active;
+		__entry->ratio = ratio;
+		__entry->reclaim_flags = trace_reclaim_flags(file) &
+					 RECLAIM_WB_LRU;
+	),
+
+	TP_printk("nid=%d reclaim_idx=%d total_inactive=%ld inactive=%ld total_active=%ld active=%ld ratio=%ld flags=%s",
+		__entry->nid,
+		__entry->reclaim_idx,
+		__entry->total_inactive, __entry->inactive,
+		__entry->total_active, __entry->active,
+		__entry->ratio,
+		show_reclaim_flags(__entry->reclaim_flags))
+);
+
+TRACE_EVENT(mm_vmscan_node_reclaim_begin,
+
+	TP_PROTO(int nid, int order, gfp_t gfp_flags),
+
+	TP_ARGS(nid, order, gfp_flags),
+
+	TP_STRUCT__entry(
+		__field(int, nid)
+		__field(int, order)
+		__field(gfp_t, gfp_flags)
+	),
+
+	TP_fast_assign(
+		__entry->nid = nid;
+		__entry->order = order;
+		__entry->gfp_flags = gfp_flags;
+	),
+
+	TP_printk("nid=%d order=%d gfp_flags=%s",
+		__entry->nid,
+		__entry->order,
+		show_gfp_flags(__entry->gfp_flags))
+);
+
+DEFINE_EVENT(mm_vmscan_direct_reclaim_end_template, mm_vmscan_node_reclaim_end,
+
+	TP_PROTO(unsigned long nr_reclaimed),
+
+	TP_ARGS(nr_reclaimed)
 );
 
 #endif /* _TRACE_VMSCAN_H */
