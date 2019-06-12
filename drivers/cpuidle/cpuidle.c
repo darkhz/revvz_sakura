@@ -668,6 +668,8 @@ static int cpuidle_latency_notify(struct notifier_block *b,
 		unsigned long l, void *v)
 {
 	struct cpumask cpus;
+	
+	static unsigned long prev_latency = ULONG_MAX;
 
 	if (l < prev_latency) {
 		cpumask_andnot(&cpus, cpu_online_mask, cpu_isolated_mask);
