@@ -409,7 +409,7 @@ static int suspend_enter(suspend_state_t state, bool *wakeup)
 			error = -EBUSY;
 		}
 
-		start_logging_wakeup_reasons();
+		//start_logging_wakeup_reasons();
 		syscore_resume();
 	}
 
