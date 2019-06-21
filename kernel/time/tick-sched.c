@@ -806,9 +806,10 @@ static ktime_t tick_nohz_stop_sched_tick(struct tick_sched *ts,
 			goto out;
 
 		WARN_ON_ONCE(1);
-		printk_once("basemono: %llu ts->next_tick.tv64: %llu dev->next_event: %llu timer->active: %d timer->expires: %llu\n",
+		/*printk_once("basemono: %llu ts->next_tick.tv64: %llu dev->next_event: %llu timer->active: %d timer->expires: %llu\n",
 			    basemono, ts->next_tick.tv64, dev->next_event,
 			    hrtimer_active(&ts->sched_timer), hrtimer_get_expires(&ts->sched_timer));
+		*/
 	}
 
 	/*
