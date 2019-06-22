@@ -626,6 +626,7 @@ static ssize_t pl_store(struct gov_attr_set *attr_set, const char *buf,
 	struct sugov_tunables *tunables = to_sugov_tunables(attr_set);
 	if (kstrtobool(buf, &tunables->pl))
 		return -EINVAL;
+
 	return count;
 }
 

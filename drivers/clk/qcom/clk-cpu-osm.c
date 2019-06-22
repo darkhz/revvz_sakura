@@ -43,7 +43,8 @@
 
 #define OSM_INIT_RATE			300000000UL
 #define XO_RATE				19200000UL
-#define RATE_LIMIT_US			10000
+#define MIN_RATE_LIMIT_US		500
+#define MAX_RATE_LIMIT_US		1000
 #define OSM_TABLE_SIZE			40
 #define SINGLE_CORE			1
 #define MAX_CLUSTER_CNT			3
@@ -235,38 +236,6 @@ static int clk_cpu_set_rate(struct clk_hw *hw, unsigned long rate,
 	return 0;
 }
 
-static int clk_pwrcl_set_rate(struct clk_hw *hw, unsigned long rate,
-						unsigned long parent_rate)
-{
-	struct clk_hw *p_hw = clk_hw_get_parent(hw);
-	struct clk_osm *parent = to_clk_osm(p_hw);
-	int ret, index = 0, count = 40;
-	u32 curr_lval;
-
-	ret = clk_cpu_set_rate(hw, rate, parent_rate);
-	if (ret)
-		return ret;
-
-	index = clk_osm_search_table(parent->osm_table,
-					parent->num_entries, rate);
-	if (index < 0)
-		return -EINVAL;
-
-	/*
-	 * Poll the CURRENT_FREQUENCY value of the PSTATE_STATUS register to
-	 * check if the L_VAL has been updated.
-	 */
-	while (count-- > 0) {
-		curr_lval = CURRENT_LVAL(clk_osm_read_reg(parent,
-								PSTATE_STATUS));
-		if (curr_lval <= parent->osm_table[index].lval)
-			return 0;
-		udelay(50);
-	}
-	pr_err("cannot set %s to %lu\n", clk_hw_get_name(hw), rate);
-	return -ETIMEDOUT;
-}
-
 static unsigned long clk_cpu_recalc_rate(struct clk_hw *hw,
 					unsigned long parent_rate)
 {
@@ -381,7 +350,7 @@ static const struct clk_ops clk_ops_l3_osm = {
 };
 
 static const struct clk_ops clk_ops_pwrcl_core = {
-	.set_rate = clk_pwrcl_set_rate,
+	.set_rate = clk_cpu_set_rate,
 	.round_rate = clk_cpu_round_rate,
 	.recalc_rate = clk_cpu_recalc_rate,
 	.debug_init = clk_debug_measure_add,
@@ -723,9 +692,9 @@ osm_set_index(struct clk_osm *c, unsigned int index)
 
 	/* The old rate needs time to settle before it can be changed again */
 	delta_us = ktime_us_delta(ktime_get_boottime(), parent->last_update);
-	if (delta_us < RATE_LIMIT_US)
-		usleep_range(RATE_LIMIT_US - delta_us,
-			     (RATE_LIMIT_US + 1000) - delta_us);
+	if (delta_us < MIN_RATE_LIMIT_US)
+		usleep_range(MIN_RATE_LIMIT_US - delta_us,
+			     MAX_RATE_LIMIT_US - delta_us);
 	parent->last_update = ktime_get_boottime();
 
 	clk_set_rate(c->hw.clk, clk_round_rate(c->hw.clk, rate));
@@ -842,7 +811,7 @@ static int osm_cpufreq_cpu_init(struct cpufreq_policy *policy)
 	}
 
 	policy->dvfs_possible_from_any_cpu = true;
-	policy->cpuinfo.transition_latency = RATE_LIMIT_US;
+	policy->cpuinfo.transition_latency = MIN_RATE_LIMIT_US;
 	policy->driver_data = c;
 	return 0;
 
