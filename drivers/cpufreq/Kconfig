@@ -158,6 +158,12 @@ config CPU_FREQ_DEFAULT_GOV_PWRUTILX
 	  have a look at the help section of that governor. The fallback
 	  governor will be 'performance'.
 
+config CPU_FREQ_DEFAULT_GOV_SMURFUTIL
+	bool "smurfutil
+	select CPU_FREQ_GOV_SMURFUTIL
+	select CPU_FREQ_GOV_PERFORMANCE
+	help
+
 endchoice
 
 config CPU_FREQ_GOV_PERFORMANCE
