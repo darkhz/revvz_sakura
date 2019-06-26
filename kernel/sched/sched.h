@@ -211,6 +211,11 @@ static inline int task_has_dl_policy(struct task_struct *p)
 	return dl_policy(p->policy);
 }
 
+static inline int task_has_idle_policy(struct task_struct *p)
+{
+	return idle_policy(p->policy);
+}
+
 /*
  * Tells if entity @a should preempt entity @b.
  */
@@ -465,8 +470,11 @@ struct cfs_bandwidth { };
 
 /* CFS-related fields in a runqueue */
 struct cfs_rq {
-	struct load_weight load;
-	unsigned int nr_running, h_nr_running;
+	struct load_weight	load;
+	unsigned long		runnable_weight;
+	unsigned int		nr_running;
+	unsigned int		h_nr_running;      /* SCHED_{NORMAL,BATCH,IDLE} */
+	unsigned int		idle_h_nr_running; /* SCHED_IDLE */
 
 	u64 exec_clock;
 	u64 min_vruntime;
