@@ -139,3 +139,6 @@ obj-$(CONFIG_EFIVAR_FS)		+= efivarfs/
 obj-$(CONFIG_DYNAMIC_FSYNC)	+= dyn_sync_cntrl.o
 CFLAGS_binfmt_elf.o		+= -Wframe-larger-than=8192
 CFLAGS_compat_binfmt_elf.o	+= -Wframe-larger-than=8192
+
+CFLAGS_binfmt_elf.o		+= -Wframe-larger-than=8192
+CFLAGS_compat_binfmt_elf.o	+= -Wframe-larger-than=8192
