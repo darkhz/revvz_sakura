@@ -106,13 +106,11 @@ void kgsl_dump_syncpoints(struct kgsl_device *device,
 				retired);
 			break;
 		}
-		case KGSL_CMD_SYNCPOINT_TYPE_FENCE: {
-			int j;
-			struct event_fence_info *info = &event->info;
-
-			for (j = 0; j < info->num_fences; j++)
-				dev_err(device->dev, "[%d]  fence: %s\n",
-					i, info->fences[j].name);
+		case KGSL_CMD_SYNCPOINT_TYPE_FENCE:
+#ifdef CONFIG_SYNC_DEBUG
+			dev_err(device->dev, "  fence: %s\n",
+					event->fence_name);
+#endif
 			break;
 		}
 	}
@@ -162,14 +160,13 @@ static void syncobj_timer(unsigned long data)
 			dev_err(device->dev, "       [%d] TIMESTAMP %d:%d\n",
 				i, event->context->id, event->timestamp);
 			break;
-		case KGSL_CMD_SYNCPOINT_TYPE_FENCE: {
-			int j;
-			struct event_fence_info *info = &event->info;
+		case KGSL_CMD_SYNCPOINT_TYPE_FENCE:
+#ifdef CONFIG_SYNC_DEBUG
 
-			for (j = 0; j < info->num_fences; j++)
-				dev_err(device->dev, "       [%d] FENCE %s\n",
-					i, info->fences[j].name);
-			break;
+			dev_err(device->dev, "       [%d] FENCE %s\n",
+					i, event->fence_name);
+#endif
+		break;
 		}
 	}
 
@@ -354,10 +351,11 @@ static bool drawobj_sync_fence_func(void *priv)
 {
 	struct kgsl_drawobj_sync_event *event = priv;
 
+#ifdef CONFIG_SYNC_DEBUG
 	for (i = 0; i < event->info.num_fences; i++)
 		trace_syncpoint_fence_expire(event->syncobj,
 			event->info.fences[i].name);
-
+#endif
 	/*
 	 * Only call kgsl_drawobj_put() if it's not marked for cancellation
 	 * in another thread.
