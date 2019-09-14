@@ -27,7 +27,7 @@
 	interrupt-parent = <&wakegic>;
 
 	chosen {
-		bootargs = "core_ctl_disable_cpumask=0-7 kpti=0 audit=0 audit_enable=0 zswap.zpool=z3fold enforcing=0";
+		bootargs = "core_ctl_disable_cpumask=0-7 kpti=0 audit=0 audit_enable=0 enforcing=0";
 	};
 
 	vendor: vendor {
@@ -47,12 +47,20 @@
 
 			fstab {
 				compatible = "android,fstab";
+			    system {
+					compatible = "android,vendor";
+					dev = "/dev/block/platform/soc/7824900.sdhci/by-name/system";
+					type = "ext4";
+					mnt_flags = "ro,barrier=1,discard,noatime,nodiratime,commit=60";
+					fsmgr_flags = "wait";
+					status = "ok";
+				};
 				vendor {
 					compatible = "android,vendor";
 					dev = "/dev/block/platform/soc/7824900.sdhci/by-name/vendor";
 					type = "ext4";
-					mnt_flags = "ro,barrier=1,discard";
-					fsmgr_flags = "wait,avb";
+					mnt_flags = "ro,barrier=1,discard,noatime,nodiratime";
+					fsmgr_flags = "wait";
 					status = "ok";
 				};
 
