@@ -7715,7 +7715,7 @@ static unsigned long cpu_util_next(int cpu, struct task_struct *p, int dst_cpu)
  * landscape of the * CPUs after the task migration, and uses the Energy Model
  * to compute what would be the energy if we decided to actually migrate that
  * task.
- */
+ *
 static long
 compute_energy_simple(struct task_struct *p, int dst_cpu, struct perf_domain *pd)
 {
@@ -7724,7 +7724,7 @@ compute_energy_simple(struct task_struct *p, int dst_cpu, struct perf_domain *pd
 
 	for (; pd; pd = pd->next) {
 		max_util = sum_util = 0;
-		/*
+		*
 		 * The capacity state of CPUs of the current rd can be driven by
 		 * CPUs of another rd if they belong to the same performance
 		 * domain. So, account for the utilization of these CPUs too
@@ -7733,7 +7733,7 @@ compute_energy_simple(struct task_struct *p, int dst_cpu, struct perf_domain *pd
 		 * If an entire performance domain is outside of the current rd,
 		 * it will not appear in its pd list and will not be accounted
 		 * by compute_energy_simple().
-		 */
+		 *
 		for_each_cpu_and(cpu, perf_domain_span(pd), cpu_online_mask) {
 			util = cpu_util_next(cpu, p, dst_cpu);
 			max_util = max(util, max_util);
@@ -7745,6 +7745,7 @@ compute_energy_simple(struct task_struct *p, int dst_cpu, struct perf_domain *pd
 
 	return energy;
 }
+*/
 
 /*
  * find_energy_efficient_cpu(): Find most energy-efficient target CPU for the
@@ -7784,7 +7785,7 @@ compute_energy_simple(struct task_struct *p, int dst_cpu, struct perf_domain *pd
  * their util_avg from the parent task, but those heuristics could hurt
  * other use-cases too. So, until someone finds a better way to solve this,
  * let's keep things simple by re-using the existing slow path.
- */
+ *
 
 static int find_energy_efficient_cpu(struct task_struct *p, int prev_cpu)
 {
@@ -7806,10 +7807,10 @@ static int find_energy_efficient_cpu(struct task_struct *p, int prev_cpu)
 		goto fail;
 	head = pd;
 
-	/*
+	 *
 	 * Energy-aware wake-up happens on the lowest sched_domain starting
 	 * from sd_asym_cpucapacity spanning over this_cpu and prev_cpu.
-	 */
+	 *
 	sd = rcu_dereference(*this_cpu_ptr(&sd_asym_cpucapacity));
 	while (sd && !cpumask_test_cpu(prev_cpu, sched_domain_span(sd)))
 		sd = sd->parent;
@@ -7832,23 +7833,23 @@ static int find_energy_efficient_cpu(struct task_struct *p, int prev_cpu)
 			if (!cpumask_test_cpu(cpu, &p->cpus_allowed))
 				continue;
 
-			/* Skip CPUs that will be overutilized. */
+			* Skip CPUs that will be overutilized. *
 			util = cpu_util_next(cpu, p, cpu);
 			cpu_cap = capacity_of(cpu);
 			if (cpu_cap * 1024 < util * capacity_margin)
 				continue;
 
-			/* Always use prev_cpu as a candidate. */
+			* Always use prev_cpu as a candidate. *
 			if (!prefer_idle && cpu == prev_cpu) {
 				prev_energy = compute_energy_simple(p, prev_cpu, head);
 				best_energy = min(best_energy, prev_energy);
 				continue;
 			}
 
-			/*
+			 *
 			 * Find the CPU with the maximum spare capacity in
 			 * the performance domain
-			 */
+			 *
 			spare_cap = cpu_cap - util;
 			if (spare_cap > max_spare_cap) {
 				max_spare_cap = spare_cap;
@@ -7879,7 +7880,7 @@ static int find_energy_efficient_cpu(struct task_struct *p, int prev_cpu)
 			}
 		}
 
-		/* Evaluate the energy impact of using this CPU. */
+		* Evaluate the energy impact of using this CPU. *
 		if (!prefer_idle && max_spare_cap_cpu >= 0) {
 			cur_energy = compute_energy_simple(p, max_spare_cap_cpu, head);
 			if (cur_energy < best_energy) {
@@ -7894,10 +7895,10 @@ unlock:
 	if (prefer_idle)
 		return best_idle_cpu >= 0 ? best_idle_cpu : highest_spare_cap_cpu;
 
-	/*
+	 *
 	 * Pick the best CPU if prev_cpu cannot be used, or if it saves at
 	 * least 6% of the energy used by prev_cpu.
-	 */
+	 *
 	if (prev_energy == ULONG_MAX)
 		return best_energy_cpu;
 
@@ -7911,6 +7912,7 @@ fail:
 
 	return -1;
 }
+*/
 
 /*
  * select_task_rq_fair: Select target runqueue for the waking task in domains
@@ -12464,7 +12466,7 @@ void check_for_migration(struct rq *rq, struct task_struct *p)
 
 		raw_spin_lock(&migration_lock);
 		rcu_read_lock();
-		new_cpu = select_energy_cpu_brute(p, cpu);
+		new_cpu = select_energy_cpu_brute(p, cpu, 0);
 		rcu_read_unlock();
 		if (capacity_orig_of(new_cpu) > capacity_orig_of(cpu)) {
 			active_balance = kick_active_balance(rq, p, new_cpu);
