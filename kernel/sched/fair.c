@@ -6986,6 +6986,7 @@ static inline int find_best_target(struct task_struct *p, int *backup_cpu,
 	unsigned long target_util = ULONG_MAX;
 	unsigned long best_active_util = ULONG_MAX;
 	unsigned long best_active_cuml_util = ULONG_MAX;
+	unsigned long best_idle_cuml_util = ULONG_MAX;
 	unsigned long target_idle_max_spare_cap = 0;
 	int best_idle_cstate = INT_MAX;
 	struct sched_domain *sd;
@@ -7220,6 +7221,15 @@ static inline int find_best_target(struct task_struct *p, int *backup_cpu,
 				if (capacity_orig >= target_capacity &&
 				    sysctl_sched_cstate_aware &&
 				    best_idle_cstate <= idle_idx)
+
+				if (sysctl_sched_cstate_aware &&
+				    best_idle_cstate < idle_idx)
+					continue;
+
+				if (best_idle_cstate == idle_idx &&
+					(best_idle_cpu == prev_cpu ||
+					(i != prev_cpu &&
+					new_util_cuml > best_idle_cuml_util)))
 					continue;
 
 				/* Keep track of best idle CPU */
@@ -7227,6 +7237,7 @@ static inline int find_best_target(struct task_struct *p, int *backup_cpu,
 				target_idle_max_spare_cap = capacity_orig -
 							    min_capped_util;
 				best_idle_cstate = idle_idx;
+				best_idle_cuml_util = new_util_cuml;
 				best_idle_cpu = i;
 				continue;
 			}
@@ -7271,14 +7282,23 @@ static inline int find_best_target(struct task_struct *p, int *backup_cpu,
 		}
 
 		/*
-		 * We start with group where the task should be placed. When
-		 * placement boost is active reset the target_capacity to keep
-		 * traversing the other higher clusters. Don't reset it if we
-		 * are already at the highest cluster.
+		 * For placement boost (or otherwise), we start with group
+		 * where the task should be placed. When
+		 * placement boost is active, and we are not at the highest
+		 * capacity group reset the target_capacity to keep
+		 * traversing to other higher clusters.
+		 * If we already are at the highest capacity cluster we skip
+		 * going around to the lower capacity cluster if we've found
+		 * a cpu.
 		 */
-		if (fbt_env->placement_boost &&
-			!is_max_capacity_cpu(group_first_cpu(sg)))
-			target_capacity = ULONG_MAX;
+		if (fbt_env->placement_boost) {
+			if (capacity_orig_of(group_first_cpu(sg)) <
+				capacity_orig_of(group_first_cpu(sg->next)))
+				target_capacity = ULONG_MAX;
+			else
+				if (target_cpu != -1 || best_idle_cpu != -1)
+					break;
+		}
 
 		if (!sysctl_sched_is_big_little && !prefer_idle) {
 
@@ -7661,6 +7681,7 @@ unlock:
  * Predicts what cpu_util(@cpu) would return if @p was migrated (and enqueued)
  * to @dst_cpu.
  */
+/*
 static unsigned long cpu_util_next(int cpu, struct task_struct *p, int dst_cpu)
 {
 	struct cfs_rq *cfs_rq = &cpu_rq(cpu)->cfs;
@@ -7668,11 +7689,11 @@ static unsigned long cpu_util_next(int cpu, struct task_struct *p, int dst_cpu)
 
 #ifdef CONFIG_SCHED_WALT
 	if (!walt_disabled && sysctl_sched_use_walt_cpu_util) {
-		/*
+		*
 		 * Since WALT doesn't have blocked util, there is no need to
 		 * remove the task contribution during wake-up. Just add it to
 		 * the destination CPU.
-		 */
+		 *
 		util = cpu_util(cpu);
 		if (cpu == dst_cpu)
 			util += task_util(p);
@@ -7681,12 +7702,12 @@ static unsigned long cpu_util_next(int cpu, struct task_struct *p, int dst_cpu)
 	}
 #endif
 
-	/*
+	*
 	 * If @p migrates from @cpu to another, remove its contribution. Or,
 	 * if @p migrates from another CPU to @cpu, add its contribution. In
 	 * the other cases, @cpu is not impacted by the migration, so the
 	 * util_avg should already be correct.
-	 */
+	 *
 	util = READ_ONCE(cfs_rq->avg.util_avg);
 	if (task_cpu(p) == cpu && dst_cpu != cpu)
 		sub_positive(&util, p->se.avg.util_avg);
@@ -7695,6 +7716,7 @@ static unsigned long cpu_util_next(int cpu, struct task_struct *p, int dst_cpu)
 
 	return min(util, capacity_orig_of(cpu));
 }
+*/
 
 /*
  * compute_energy_simple(): Estimates the energy that would be consumed if @p was
