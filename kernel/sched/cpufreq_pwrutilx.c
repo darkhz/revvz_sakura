@@ -955,7 +955,7 @@ static int pwrgov_init(struct cpufreq_policy *policy)
 	tunables->pl = 1;
 	tunables->rate_limit_us = LATENCY_MULTIPLIER;
 	tunables->hispeed_load = DEFAULT_HISPEED_LOAD;
-	tunables->hispeed_freq = 1132800;
+	tunables->hispeed_freq = 1689600;
 	lat = policy->cpuinfo.transition_latency / NSEC_PER_USEC;
 	if (lat)
 		tunables->rate_limit_us *= lat;
