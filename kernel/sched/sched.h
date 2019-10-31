@@ -529,10 +529,8 @@ struct cfs_rq {
 	struct walt_sched_stats walt_stats;
 #endif
 
-	int runtime_enabled;
 	u64 runtime_expires;
-	s64 runtime_remaining;
-
+	
 	u64 throttled_clock, throttled_clock_task;
 	u64 throttled_clock_task_time;
 	int throttled, throttle_count;
