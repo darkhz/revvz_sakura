@@ -92,6 +92,8 @@
 #include "../smpboot.h"
 #include "../time/tick-internal.h"
 
+#include <linux/nospec.h>
+
 #define CREATE_TRACE_POINTS
 #include <trace/events/sched.h>
 #include "walt.h"
@@ -10527,46 +10529,6 @@ static ssize_t cpu_max_write(struct kernfs_open_file *of,
 	return ret ?: nbytes;
 }
 #endif
-
-static struct cftype cpu_files[] = {
-#ifdef CONFIG_FAIR_GROUP_SCHED
-	{
-		.name = "weight",
-		.flags = CFTYPE_NOT_ON_ROOT,
-		.read_u64 = cpu_weight_read_u64,
-		.write_u64 = cpu_weight_write_u64,
-	},
-	{
-		.name = "weight.nice",
-		.flags = CFTYPE_NOT_ON_ROOT,
-		.read_s64 = cpu_weight_nice_read_s64,
-		.write_s64 = cpu_weight_nice_write_s64,
-	},
-#endif
-#ifdef CONFIG_CFS_BANDWIDTH
-	{
-		.name = "max",
-		.flags = CFTYPE_NOT_ON_ROOT,
-		.seq_show = cpu_max_show,
-		.write = cpu_max_write,
-	},
-#endif
-#ifdef CONFIG_UCLAMP_TASK_GROUP
-	{
-		.name = "uclamp.min",
-		.flags = CFTYPE_NOT_ON_ROOT,
-		.seq_show = cpu_uclamp_min_show,
-		.write = cpu_uclamp_min_write,
-	},
-	{
-		.name = "uclamp.max",
-		.flags = CFTYPE_NOT_ON_ROOT,
-		.seq_show = cpu_uclamp_max_show,
-		.write = cpu_uclamp_max_write,
-	},
-#endif
-	{ }	/* terminate */
-};
 
 struct cgroup_subsys cpu_cgrp_subsys = {
 	.css_alloc	= cpu_cgroup_css_alloc,
