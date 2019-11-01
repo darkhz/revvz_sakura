@@ -87,7 +87,7 @@ unsigned int sysctl_sched_latency = 6000000ULL;
 unsigned int normalized_sysctl_sched_latency = 6000000ULL;
 
 unsigned int sysctl_sched_is_big_little = 1;
-unsigned int sysctl_sched_sync_hint_enable = 1;
+unsigned int sysctl_sched_sync_hint_enable = 0;
 unsigned int sysctl_sched_cstate_aware = 1;
 DEFINE_PER_CPU_READ_MOSTLY(int, sched_load_boost);
 
@@ -136,7 +136,7 @@ unsigned int sysctl_sched_child_runs_first __read_mostly;
 unsigned int sysctl_sched_wakeup_granularity = 1000000UL;
 unsigned int normalized_sysctl_sched_wakeup_granularity = 1000000UL;
 
-const_debug unsigned int sysctl_sched_migration_cost = 500000UL;
+const_debug unsigned int sysctl_sched_migration_cost = 0UL;
 
 /*
  * The exponential sliding  window over which load is averaged for shares
