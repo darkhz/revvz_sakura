@@ -851,7 +851,7 @@ static void oom_kill_process(struct oom_control *oc, const char *message)
 	struct mm_struct *mm;
 	unsigned int victim_points = 0;
 	static DEFINE_RATELIMIT_STATE(oom_rs, DEFAULT_RATELIMIT_INTERVAL,
-					      DEFAULT_RATELIMIT_BURST);
+					      1);
 	bool can_oom_reap = true;
 
 	/*
