@@ -1673,15 +1673,6 @@ SYSCALL_DEFINE5(waitid, int, which, pid_t, upid, struct siginfo __user *,
 		else
 			pid = get_task_pid(current, PIDTYPE_PGID);
 		break;
-	case P_PIDFD:
-		type = PIDTYPE_PID;
-		if (upid < 0)
-			return -EINVAL;
-
-		pid = pidfd_get_pid(upid);
-		if (IS_ERR(pid))
-			return PTR_ERR(pid);
-		break;
 	default:
 		return -EINVAL;
 	}
