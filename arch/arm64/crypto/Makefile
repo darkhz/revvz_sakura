@@ -19,7 +19,7 @@ ghash-ce-y := ghash-ce-glue.o ghash-ce-core.o
 
 obj-$(CONFIG_CRYPTO_AES_ARM64_CE) += aes-ce-cipher.o
 aes-ce-cipher-y := aes-ce-cipher-glue.o aes-ce-cipher-core.o
-CFLAGS_aes-ce-cipher-core.o += -march=armv8-a+crc+crypto -Wa,-march=armv8-a+crc+crypto $(call cc-option,-no-integrated-as) $(DISABLE_LTO) -mtune=cortex-a53 -mcpu=cortex-a53+crc+crypto -O3
+CFLAGS_aes-ce-cipher-core.o +=  -Wa, $(call cc-option,-no-integrated-as) $(DISABLE_LTO) -mtune=cortex-a53 -mcpu=cortex-a53+crc+crypto -O3
 
 obj-$(CONFIG_CRYPTO_AES_ARM64_CE_CCM) += aes-ce-ccm.o
 aes-ce-ccm-y := aes-ce-ccm-glue.o aes-ce-ccm-core.o
@@ -36,11 +36,11 @@ speck-neon-y := speck-neon-core.o speck-neon-glue.o
 AFLAGS_aes-ce.o		:= -DINTERLEAVE=4
 AFLAGS_aes-neon.o	:= -DINTERLEAVE=4
 
-CFLAGS_aes-glue-ce.o	:= -DUSE_V8_CRYPTO_EXTENSIONS -march=armv8-a+crc+crypto -mtune=cortex-a53 -mcpu=cortex-a53+crc+crypto -O3
+CFLAGS_aes-glue-ce.o	:= -DUSE_V8_CRYPTO_EXTENSIONS  -mtune=cortex-a53 -mcpu=cortex-a53+crc+crypto -O3
 
 obj-$(CONFIG_CRYPTO_CRC32_ARM64) += crc32-arm64.o
 
-CFLAGS_crc32-arm64.o	:= -march=armv8-a+crc+crypto -mtune=cortex-a53 -mcpu=cortex-a53+crc+crypto -O3
+CFLAGS_crc32-arm64.o	:=  -mtune=cortex-a53 -mcpu=cortex-a53+crc+crypto -O3
 
 $(obj)/aes-glue-%.o: $(src)/aes-glue.c FORCE
 	$(call if_changed_rule,cc_o_c)

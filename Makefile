@@ -303,7 +303,7 @@ CONFIG_SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; \
 
 HOSTCC       = gcc
 HOSTCXX      = g++
-HOSTCFLAGS   = -Wall -Wmissing-prototypes -Wstrict-prototypes -O2 -fomit-frame-pointer -std=gnu89 -flto -fgcse-las -fgraphite -fgraphite-identity -floop-flatten -floop-parallelize-all -ftree-loop-linear -floop-interchange -floop-strip-mine -floop-block
+HOSTCFLAGS   = -Wall -Wmissing-prototypes -Wstrict-prototypes -O2 -flto -fomit-frame-pointer -std=gnu89 -fgcse-las -fgraphite -fgraphite-identity -floop-flatten -floop-parallelize-all -ftree-loop-linear -floop-interchange -floop-strip-mine -floop-block
 HOSTCXXFLAGS = -O2 -flto -fgcse-las -fgraphite -fgraphite-identity -floop-flatten -floop-parallelize-all -ftree-loop-linear -floop-interchange -floop-strip-mine -floop-block
 
 ifeq ($(shell $(HOSTCC) -v 2>&1 | grep -c "clang version"), 1)
@@ -397,14 +397,14 @@ KBUILD_AFLAGS   := -D__ASSEMBLY__
 KBUILD_CFLAGS   := -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
 		   -fno-strict-aliasing -fno-common -fshort-wchar \
 		   -Werror-implicit-function-declaration \
-		   -Wno-format-security -ffast-math -mtune=cortex-a53 -mcpu=cortex-a53+crc+crypto -march=armv8-a+crc+crypto \
+		   -Wno-format-security -ffast-math -mtune=cortex-a53 -mcpu=cortex-a53+crc+crypto  \
 		   -std=gnu89 -O3 
-KBUILD_CPPFLAGS := -D__KERNEL__ -O3 -mtune=cortex-a53 -mcpu=cortex-a53+crc+crypto -march=armv8-a+crc+crypto
+KBUILD_CPPFLAGS := -D__KERNEL__ -O3 -mtune=cortex-a53 -mcpu=cortex-a53+crc+crypto 
 KBUILD_AFLAGS_KERNEL :=
 KBUILD_CFLAGS_KERNEL :=
 KBUILD_AFLAGS   := -D__ASSEMBLY__ -O2
 KBUILD_AFLAGS_MODULE  := -DMODULE
-KBUILD_CFLAGS_MODULE  := -DMODULE -fno-pic -O3 -mtune=cortex-a53 -mcpu=cortex-a53+crc+crypto -march=armv8-a+crc+crypto
+KBUILD_CFLAGS_MODULE  := -DMODULE -fno-pic -O3 -mtune=cortex-a53 -mcpu=cortex-a53+crc+crypto 
 KBUILD_LDFLAGS_MODULE := -T $(srctree)/scripts/module-common.lds
 GCC_PLUGINS_CFLAGS :=
 
@@ -801,8 +801,8 @@ KBUILD_CFLAGS += $(call cc-option, -no-integrated-as)
 KBUILD_AFLAGS += $(call cc-option, -no-integrated-as)
 KBUILD_CFLAGS += -Wno-sometimes-uninitialized -Wno-asm-operand-widths \
 		 -Wno-typedef-redefinition -Wno-non-literal-null-conversion -Wno-header-guard \
-		 -Wno-constant-conversion -Wno-enum-conversion -Wno-vectorizer-no-neon\
-		 -Wno-undefined-optimized -fno-integrated-as -Wno-gnu-variable-sized-type-not-at-end\
+		 -Wno-constant-conversion -Wno-enum-conversion \
+		 -fno-integrated-as -Wno-gnu-variable-sized-type-not-at-end\
          -Wno-gnu-folding-constant -Wno-tautological-compare -Wno-address-of-packed-member\
          -Wno-tautological-pointer-compare -Wno-gnu-designator -Wno-pointer-bool-conversion\
          -Wno-tautological-constant-out-of-range-compare\
