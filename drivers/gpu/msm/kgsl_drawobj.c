@@ -115,7 +115,6 @@ void kgsl_dump_syncpoints(struct kgsl_device *device,
 					i, info->fences[j].name);
 			break;
 		}
-		}
 	}
 }
 
@@ -171,7 +170,6 @@ static void syncobj_timer(unsigned long data)
 				dev_err(device->dev, "       [%d] FENCE %s\n",
 					i, info->fences[j].name);
 			break;
-		}
 		}
 	}
 

@@ -56,6 +56,7 @@ enum mem_cgroup_stat_index {
 	MEMCG_SLAB_RECLAIMABLE,
 	MEMCG_SLAB_UNRECLAIMABLE,
 	MEMCG_SOCK,
+	MEMCG_WORKINGSET_ACTIVATE,
 	MEMCG_NR_STAT,
 };
 
@@ -493,6 +494,21 @@ extern int do_swap_account;
 struct mem_cgroup *lock_page_memcg(struct page *page);
 void __unlock_page_memcg(struct mem_cgroup *memcg);
 void unlock_page_memcg(struct page *page);
+
+static inline unsigned long mem_cgroup_read_stat(struct mem_cgroup *memcg,
+                                                 enum mem_cgroup_stat_index idx)
+{
+        long val = 0;
+        int cpu;
+
+        for_each_possible_cpu(cpu)
+                val += per_cpu(memcg->stat->count[idx], cpu);
+
+        if (val < 0)
+                val = 0;
+
+        return val;
+}
 
 /**
  * mem_cgroup_update_page_stat - update page state statistics
