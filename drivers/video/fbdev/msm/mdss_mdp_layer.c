@@ -1676,7 +1676,7 @@ static int __validate_layers(struct msm_fb_data_type *mfd,
 	struct mdss_overlay_private *mdp5_data = mfd_to_mdp5_data(mfd);
 
 	struct mdss_mdp_mixer *mixer = NULL;
-	struct mdp_input_layer *layer, *layer_list;
+	struct mdp_input_layer *layer, *prev_layer, *layer_list;
 	struct mdss_mdp_validate_info_t validate_info_list[MAX_LAYER_COUNT];
 	bool is_single_layer = false, force_validate;
 	enum layer_pipe_q pipe_q_type;
@@ -2055,7 +2055,6 @@ int mdss_mdp_layer_pre_commit(struct msm_fb_data_type *mfd,
 	struct mdp_input_layer *layer_list;
 	struct mdss_overlay_private *mdp5_data;
 	struct mdss_mdp_data *src_data[MDSS_MDP_MAX_SSPP];
-	struct mdss_mdp_ctl *sctl = NULL;
 
 	mdp5_data = mfd_to_mdp5_data(mfd);
 

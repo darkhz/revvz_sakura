@@ -5067,11 +5067,6 @@ err:
 		layer_list[i].scale = NULL;
 		mdss_mdp_free_layer_pp_info(&layer_list[i]);
 	}
-	if (frc_info_user) {
-		for (i = 0; i < commit.commit_v1.dest_scaler_cnt; i++)
-			kfree(to_user_ptr(ds_data[i].scale));
-		kfree(ds_data);
-	}
 
 	return ret;
 }
