@@ -19,7 +19,6 @@ config CARL9170_LEDS
 	select MAC80211_LEDS
 	select LEDS_CLASS
 	select NEW_LEDS
-	default y
 	help
 	  This option is necessary, if you want your device' LEDs to blink
 
@@ -37,7 +36,6 @@ config CARL9170_DEBUGFS
 config CARL9170_WPC
 	bool
 	depends on CARL9170 && (INPUT = y || INPUT = CARL9170)
-	default y
 
 config CARL9170_HWRNG
         bool "Random number generator"
