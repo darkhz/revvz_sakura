@@ -248,7 +248,6 @@ static int ufs_qcom_dbg_pm_qos_show(struct seq_file *file, void *data)
 {
 	struct ufs_qcom_host *host = (struct ufs_qcom_host *)file->private;
 	unsigned long flags;
-	int i;
 
 	spin_lock_irqsave(host->hba->host->host_lock, flags);
 
