@@ -36,6 +36,9 @@ static void *ion_page_pool_alloc_pages(struct ion_page_pool *pool)
 {
 	struct page *page;
 
+	if (fatal_signal_pending(current))
+		return NULL;
+
 	page = alloc_pages(pool->gfp_mask & ~__GFP_ZERO, pool->order);
 
 	if (!page)
