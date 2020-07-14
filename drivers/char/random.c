@@ -776,7 +776,7 @@ static int credit_entropy_bits_safe(struct entropy_store *r, int nbits)
  *
  *********************************************************************/
 
-#define CRNG_RESEED_INTERVAL (300*HZ)
+#define CRNG_RESEED_INTERVAL (msecs_to_jiffies(300000))
 
 static DECLARE_WAIT_QUEUE_HEAD(crng_init_wait);
 
@@ -1233,7 +1233,7 @@ void add_interrupt_randomness(int irq, int irq_flags)
 	}
 
 	if ((fast_pool->count < 64) &&
-	    !time_after(now, fast_pool->last + HZ))
+	    !time_after(now, fast_pool->last + msecs_to_jiffies(1000)))
 		return;
 
 	r = &input_pool;
@@ -1297,7 +1297,7 @@ static void xfer_secondary_pool(struct entropy_store *r, size_t nbytes)
 		unsigned long now = jiffies;
 
 		if (time_before(now,
-				r->last_pulled + random_min_urandom_seed * HZ))
+				r->last_pulled + random_min_urandom_seed * msecs_to_jiffies(1000)))
 			return;
 		r->last_pulled = now;
 	}
