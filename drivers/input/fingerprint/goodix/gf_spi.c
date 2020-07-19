@@ -334,7 +334,7 @@ static irqreturn_t gf_irq(int irq, void *handle)
     struct gf_dev *gf_dev = &gf;
 	char msg = GF_NET_EVENT_IRQ;
 
-	__pm_wakeup_event(&fp_wakelock, msecs_to_jiffies(WAKELOCK_HOLD_TIME));
+    __pm_wakeup_event(&fp_wakelock, 1000);
 
 	sendnlmsg(&msg);
 
