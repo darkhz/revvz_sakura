@@ -246,22 +246,6 @@ static const struct file_operations ufs_qcom_dbg_dbg_regs_desc = {
 
 static int ufs_qcom_dbg_pm_qos_show(struct seq_file *file, void *data)
 {
-	struct ufs_qcom_host *host = (struct ufs_qcom_host *)file->private;
-	unsigned long flags;
-
-	spin_lock_irqsave(host->hba->host->host_lock, flags);
-
-	seq_printf(file, "enabled: %d\n", host->pm_qos.is_enabled);
-	for (i = 0; i < host->pm_qos.num_groups && host->pm_qos.groups; i++)
-		seq_printf(file,
-			"CPU Group #%d(mask=0x%lx): active_reqs=%d, state=%d, latency=%d\n",
-			i, host->pm_qos.groups[i].mask.bits[0],
-			host->pm_qos.groups[i].active_reqs,
-			host->pm_qos.groups[i].state,
-			host->pm_qos.groups[i].latency_us);
-
-	spin_unlock_irqrestore(host->hba->host->host_lock, flags);
-
 	return 0;
 }
 
