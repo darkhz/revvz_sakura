@@ -2022,7 +2022,8 @@ static irqreturn_t test_hw_vsync_handler(int irq, void *data)
 static int mdss_dsi_disp_wake_thread(void *data)
 {
 	static const struct sched_param max_rt_param = {
-		.sched_priority = MAX_RT_PRIO - 1
+		//.sched_priority = MAX_RT_PRIO - 1
+		.sched_priority = 16
 	};
 	struct mdss_dsi_ctrl_pdata *ctrl_pdata = data;
 	struct mdss_panel_data *pdata = &ctrl_pdata->panel_data;
