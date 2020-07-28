@@ -32,7 +32,6 @@
 #include <linux/cma.h>
 #include <linux/module.h>
 #include <linux/bitops.h>
-#include <linux/show_mem_notifier.h>
 #include <asm/cacheflush.h>
 #include "../ion_priv.h"
 #include "compat_msm_ion.h"
@@ -1188,7 +1187,6 @@ static int msm_ion_probe(struct platform_device *pdev)
 	 */
 	idev = new_dev;
 
-	show_mem_notifier_register(&msm_ion_nb);
 	return 0;
 
 out:
