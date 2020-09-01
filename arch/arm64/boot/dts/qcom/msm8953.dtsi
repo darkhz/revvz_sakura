@@ -27,7 +27,7 @@
 	interrupt-parent = <&wakegic>;
 
 	chosen {
-		bootargs = "quiet core_ctl_disable_cpumask=0-7 kpti=0 cpuidle.governor=teo noirqdebug";
+		bootargs = "quiet core_ctl_disable_cpumask=0-7 kpti=0 cpuidle.governor=teo noirqdebug cgroup.memory=nokmem,nosocket";
 	};
 
 	vendor: vendor {
