@@ -85,6 +85,7 @@ ssize_t bw_show(struct device *dev, struct device_attribute *attr,
 		bus_node->node_bw[DUAL_CTX].sum_ab,
 		bus_node->node_bw[DUAL_CTX].util_used,
 		bus_node->node_bw[DUAL_CTX].vrail_used);
+#endif
 	return off;
 }
 
