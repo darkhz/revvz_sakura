@@ -28,6 +28,7 @@
 #include <linux/pm_qos.h>
 #include <linux/mdss_io_util.h>
 #include <linux/dma-buf.h>
+#include <linux/lcd_notify.h>
 
 #include "mdss.h"
 #include "mdss_panel.h"
@@ -2050,6 +2051,7 @@ static int mdss_dsi_disp_wake_thread(void *data)
 
 		/* MDSS_EVENT_UNBLANK */
 		mdss_dsi_unblank(pdata);
+		lcd_notifier_call_chain(LCD_EVENT_ON_START, NULL);
 
 		/* MDSS_EVENT_PANEL_ON */
 		ctrl_pdata->ctrl_state |= CTRL_STATE_MDP_ACTIVE;
@@ -2949,9 +2951,11 @@ static int mdss_dsi_event_handler(struct mdss_panel_data *pdata,
 		mdss_dsi_display_wake(ctrl_pdata);
 		break;
 	case MDSS_EVENT_POST_PANEL_ON:
+		lcd_notifier_call_chain(LCD_EVENT_ON_END, NULL);
 		rc = mdss_dsi_post_panel_on(pdata);
 		break;
 	case MDSS_EVENT_BLANK:
+		lcd_notifier_call_chain(LCD_EVENT_OFF_START, NULL);
 		power_state = (int) (unsigned long) arg;
 		if (ctrl_pdata->off_cmds.link_state == DSI_HS_MODE)
 			rc = mdss_dsi_blank(pdata, power_state);
@@ -2964,6 +2968,7 @@ static int mdss_dsi_event_handler(struct mdss_panel_data *pdata,
 		rc = mdss_dsi_off(pdata, power_state);
 		reinit_completion(&ctrl_pdata->wake_comp);
 		atomic_set(&ctrl_pdata->disp_en, MDSS_DISPLAY_OFF);
+		lcd_notifier_call_chain(LCD_EVENT_OFF_END, NULL);
 		break;
 	case MDSS_EVENT_CONT_SPLASH_FINISH:
 		if (ctrl_pdata->off_cmds.link_state == DSI_LP_MODE)
