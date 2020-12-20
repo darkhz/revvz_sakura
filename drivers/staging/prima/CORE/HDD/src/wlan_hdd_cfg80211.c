@@ -99,6 +99,7 @@
 #include "qwlan_version.h"
 #include "wlan_logging_sock_svc.h"
 #include "wlan_hdd_misc.h"
+#include <disable.h>
 
 
 #define g_mode_rates_size (12)
@@ -6487,6 +6488,7 @@ static int __wlan_hdd_cfg80211_wifi_logger_start(struct wiphy *wiphy,
         tb[QCA_WLAN_VENDOR_ATTR_WIFI_LOGGER_FLAGS]);
     hddLog(LOG1, FL("flag=%d"), start_log.flag);
 
+#ifdef WLAN_LOGGING_SOCK_SVC_ENABLE
     if ((RING_ID_PER_PACKET_STATS == start_log.ringId) &&
                  (!hdd_ctx->cfg_ini->wlanPerPktStatsLogEnable ||
         !vos_isPktStatsEnabled()))
@@ -6495,6 +6497,7 @@ static int __wlan_hdd_cfg80211_wifi_logger_start(struct wiphy *wiphy,
        hddLog(LOGE, FL("per pkt stats not enabled"));
        return -EINVAL;
     }
+#endif
 
     vos_set_ring_log_level(start_log.ringId, start_log.verboseLevel);
     return 0;
@@ -8542,12 +8545,14 @@ __wlan_hdd_cfg80211_get_logger_supp_feature(struct wiphy *wiphy,
 	if (hdd_is_memdump_supported())
 		features |= WIFI_LOGGER_MEMORY_DUMP_SUPPORTED;
 
+#ifdef WLAN_LOGGING_SOCK_SVC_ENABLE 
 	if (hdd_ctx->cfg_ini->wlanLoggingEnable &&
 	    hdd_ctx->cfg_ini->enableFatalEvent &&
 	    hdd_ctx->is_fatal_event_log_sup) {
 		features |= WIFI_LOGGER_PER_PACKET_TX_RX_STATUS_SUPPORTED;
 		features |= WIFI_LOGGER_CONNECT_EVENT_SUPPORTED;
 	}
+#endif
 
 	reply_skb = cfg80211_vendor_cmd_alloc_reply_skb(wiphy,
 			sizeof(uint32_t) + NLA_HDRLEN + NLMSG_HDRLEN);

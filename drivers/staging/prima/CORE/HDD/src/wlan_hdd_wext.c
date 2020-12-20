@@ -106,6 +106,7 @@
 #include "vos_utils.h"
 #include "sapInternal.h"
 #include "wlan_hdd_request_manager.h"
+#include <disable.h>
 
 #ifdef CONFIG_HAS_EARLYSUSPEND
 extern void hdd_suspend_wlan(struct early_suspend *wlan_suspend);
@@ -6165,6 +6166,7 @@ static int __iw_setint_getnone(struct net_device *dev,
         {
             hdd_context_t *pHddCtx = WLAN_HDD_GET_CTX(pAdapter);
             tAniWifiStartLog start_log;
+#ifdef WLAN_LOGGING_SOCK_SVC_ENABLE 
             if (!pHddCtx->cfg_ini->wlanPerPktStatsLogEnable ||
                  !vos_isPktStatsEnabled())
             {
@@ -6172,6 +6174,7 @@ static int __iw_setint_getnone(struct net_device *dev,
                 return -EINVAL;
             }
             hddLog(LOG1, FL("Set Pkt Stats %d"), set_value);
+#endif
 
             if (1 == set_value || 0 == set_value)
             {
