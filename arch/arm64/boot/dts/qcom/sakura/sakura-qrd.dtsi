@@ -238,6 +238,7 @@
                         focal,virtual_key_3 = <158 800 2040>;/*back*/
              };
         vituralsar@33{
+						status = "disabled";
 						compatible = "virtualsar,sar";
 						reg = <0x33>;
 						interrupt-parent = <&tlmm>;
