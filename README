@@ -393,7 +393,7 @@ IF SOMETHING GOES WRONG:
    After you've rebooted with the new kernel, do "gdb vmlinux /proc/kcore".
    You can now use all the usual gdb commands. The command to look up the
    point where your system crashed is "l *0xXXXXXXXX". (Replace the XXXes
-   with the EIP value.)
+   with the EIP value.
 
    gdb'ing a non-running kernel currently fails because gdb (wrongly)
    disregards the starting offset for which the kernel is compiled.
